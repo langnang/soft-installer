@@ -63,6 +63,19 @@ class SoftwareController extends Controller
         return $result;
     }
 
+    public function getCategorySubClass()
+    {
+        $classes = $this->getSubClass();
+        $result = [];
+        foreach ($classes as $class) {
+            $category = $class->category;
+            if (empty($category)) $category = 'unknown';
+            if (!isset($result[$category])) $result[$category] = [];
+            array_push($result[$category], $class);
+        }
+        return $result;
+    }
+
     public function getPackage($version = null)
     {
         if (empty($version)) return;

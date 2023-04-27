@@ -13,7 +13,15 @@
 
         @include('shared.jumbotron', [
             'jumbotron' => [
-                'title' => "<a href=''>" . substr(basename(get_class($software)), 0, -10) . '</a>',
+                'title' =>
+                    "<a href=''>" .
+                    substr(basename(get_class($software)), 0, -10) .
+                    '</a>' .
+                    (!empty($software->github)
+                        ? '&nbsp;<small><img src="https://shields.io/github/languages/top/' .
+                            $software->github .
+                            '"/></small>'
+                        : ''),
                 'subTitle' => $software->summary,
                 'description' => $software->description,
                 'links' => array_merge($software->links, [

@@ -3,6 +3,7 @@
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -19,8 +20,9 @@ $router->get('/', function () use ($router) {
 });
 $router->group(['prefix' => 'software'], function () use ($router) {
     $router->get('/', function (Request $request) use ($router) {
-        $softwares = app('software')->getSubClass();
-        return view('soft.index', ["softwares" => $softwares]);
+        // $softwares = app('software')->getSubClass();
+        $categories = app('software')->getCategorySubClass();
+        return view('soft.index', ["categories" => $categories]);
     });
     $router->get('/{software}', function ($software, Request $request) use ($router) {
         $software = app('software')->getSubClass($software);
@@ -29,7 +31,11 @@ $router->group(['prefix' => 'software'], function () use ($router) {
         // var_dump(\App\Http\Controllers\SoftwareController::get_zip_extension('1.1.17.10.30.-release.tar.gz'));
         // $config = \App\Http\Controllers\Soft\TypechoController::get_config($software);
         // $package = \App\Http\Controllers\SoftwareController::get_package($software, $request->version);
-        return view('soft.install', [
+        $view = 'soft.install';
+        if (View::exists('soft.' . $software->name)) {
+            $view = 'soft.' . $software->name;
+        }
+        return view($view, [
             'request' => $request,
             'software' => $software,
             'package' => $package
@@ -70,7 +76,11 @@ $router->group(['prefix' => 'software'], function () use ($router) {
         // $ftp->copy(__DIR__ . '/../scripts/typecho/v1.2', '/',);
         // var_dump($config);
         // var_dump($package);
-        return view('soft.install', [
+        $view = 'soft.install';
+        if (View::exists('soft.' . $software->name)) {
+            $view = 'soft.' . $software->name;
+        }
+        return view($view, [
             'request' => $request,
             'software' => $software,
             'package' => $package,

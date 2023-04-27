@@ -5,13 +5,34 @@
   }
 </style>
 @section('content')
-  <div class="softwares section">
-    <div class="container">
+  <div class="softwares container">
+    @foreach ($categories as $category => $softwares)
+      <div class="section">
+        <div class="title-section">
+          <h2>{{ ucfirst($category) }}</h2>
+        </div>
+        <div class="row first-row">
+          @foreach ($softwares as $software)
+            <div class="col-md-3">
+              <a href='/software/{{ $software->name }}' class="entry aos-init aos-animate" data-aos="zoom-in">
+                @if (array_key_exists('icon', $software->logo))
+                  <i class="{{ $software->logo['icon'] }}"></i>
+                @elseif (array_key_exists('img', $software->logo))
+                  <img src="/public/images/brands/{{ $software->logo['img'] }}" alt="">
+                @endif
+                <h5>{{ substr(basename(get_class($software)), 0, -10) }}</h5>
+              </a>
+            </div>
+          @endforeach
+        </div>
+      </div>
+    @endforeach
+    {{-- <div class="section">
       <div class="title-section">
         <h2>Software</h2>
       </div>
       <div class="row first-row">
-        @foreach ($softwares as $software)
+         @foreach ($softwares as $software)
           <div class="col-md-3">
             <a href='/software/{{ $software->name }}' class="entry aos-init aos-animate" data-aos="zoom-in">
               @if (array_key_exists('icon', $software->logo))
@@ -24,7 +45,7 @@
           </div>
         @endforeach
 
-        {{-- <div class="col-md-3">
+     <div class="col-md-3">
           <div class="entry aos-init aos-animate" data-aos="zoom-in">
             <i class="fab fa-laravel"></i>
             <h5>Laravel</h5>
@@ -47,9 +68,9 @@
             <i class="fab fa-drupal"></i>
             <h5>Drupal</h5>
           </div>
-        </div> --}}
-      </div>
-    </div>
+        </div>
+  </div>
+  </div> --}}
   </div>
 @endsection
 

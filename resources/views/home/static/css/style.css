@@ -186,6 +186,11 @@ form .section {
     padding-right: 18px !important;
 }
 
+.navbar .nav-item:hover .nav-link.disabled,
+.navbar .nav-link.disabled {
+    color: #6c757d;
+}
+
 .navbar .nav-link.dropdown-toggle i {
     margin-left: 12px;
     position: relative;
@@ -1018,4 +1023,8 @@ footer ul li a .fa-whatsapp {
         margin-right: 0;
     }
 
+}
+
+.jumbotron small img {
+    width: unset;
 }

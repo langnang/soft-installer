@@ -17,7 +17,7 @@
             <a class="nav-link" href="/software">Software</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/template">Template</a>
+            <a class="nav-link disabled" href="/template">Template</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="/about-us">About us</a>
