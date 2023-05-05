@@ -8,12 +8,12 @@ use Illuminate\Database\Schema\Blueprint;
 
 class LaravelController extends \App\Http\Controllers\SoftwareController
 {
-    public $name = 'laravel';
+    public $name = 'Laravel';
     public $logo = [
         "icon" => "fab fa-laravel",
     ];
     public $summary = "";
-    public $category = "framework";
+    public $category = "Framework";
     public $github = "laravel/laravel";
     public $links = [
         [
@@ -78,7 +78,7 @@ class LaravelController extends \App\Http\Controllers\SoftwareController
     {
         $this->Schema->dropIfExists('users');
     }
-    public function factory_definition()
+    public function factory_definition($table)
     {
         return [
             'name' => $this->faker->name(),
@@ -87,7 +87,7 @@ class LaravelController extends \App\Http\Controllers\SoftwareController
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
         ];
     }
-    public function factory_unverified()
+    public function factory_unverified($table)
     {
         // return $this->state(function (array $attributes) {
         //     return [
@@ -98,7 +98,7 @@ class LaravelController extends \App\Http\Controllers\SoftwareController
     public function seeder_run()
     {
         for ($i = 0; $i < 10; $i++) {
-            $this->connection->table('users')->insert($this->factory_definition());
+            $this->connection->table('users')->insert($this->factory_definition(''));
         }
         // var_dump(\App\Models\Software::factory(20));
         // var_dump(\Illuminate\Database\Eloquent\Factories\Factory);

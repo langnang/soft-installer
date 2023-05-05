@@ -97,7 +97,7 @@
       switch ($type) {
           case 'light':
               $prefixMessage = '<i class="spinner-grow spinner-grow-sm"></i>';
-              $suffixMessage = '<i class="fa fa-ellipsis"></i>';
+              $suffixMessage = '    <i class="fa fa-ellipsis"></i>';
               break;
           case 'success':
               $prefixMessage = '<i class="fa fa-check"></i>';
@@ -130,72 +130,73 @@
   ignore_user_abort(true); //设置断开连接继续执行
   header('X-Accel-Buffering: no'); //关闭buffer
   ob_start(); //打开输出缓冲控制
-  if ($ftp_connect_error_message === true && $db_connect_error_message === true) {
-      
-
-      //       $localFile;
-      //       // 检测本地应用包
-      //       foreach ($package['urls'] as $url) {
-      //           $file = $software->name . '-' . $package['version'] . '.zip';
-      //           if (file_exists(__DIR__ . '/../../../scripts/' . $software->name . '/' . $file)) {
-      //               $localFile = $file;
-      //               break;
-      //           }
-      //       }
-      //       if (!empty($localFile)) {
-      //           appendProgressInfo('<i class="fa fa-check"></i>检测到本地应用包.' . $localFile, 'success');
-      //       } else {
-      //           //   appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>未检测到本地应用包');
-      //           appendProgressInfo('未检测到本地应用包');
-      //       }
-      //       // 未检测到本地应用包，下载远程应用包
-      //       if (empty($localFile)) {
-      //           $remoteFile;
-      //           foreach ($package['urls'] as $index => $url) {
-      //               var_dump(pathinfo($url));
-      //               $file = $software->name . '-' . $package['version'] . '.zip';
-      //               appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>连接远程应用包(' . ($index + 1) . '/' . sizeof($package['urls']) . ')');
-      //               $fp_input;
-      //               try {
-      //                   $fp_input = fopen($url, 'r');
-      //                   appendProgressInfo('<i class="fa fa-check"></i>连接远程应用包(' . ($index + 1) . '/' . sizeof($package['urls']) . ')', 'success', true);
-      //                   file_put_contents(__DIR__ . '/../../../scripts/' . $software->name . '/' . $file, $fp_input);
-      //                   $localFile = $file;
-      //                   break;
-      //               } catch (Exception $e) {
-      //                   appendProgressInfo($e->getMessage(), 'danger');
-      //               }
-      //           }
-      //       }
-      //       if (!file_exists(__DIR__ . '/../../../scripts/' . $software->name . '/' . pathinfo($localFile)['filename'])) {
-      //           try {
-      //               appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>解压缩应用包');
-      //               var_dump(__DIR__ . '/../../../scripts/' . $software->name . '/' . $localFile);
-      //               var_dump(pathinfo($localFile));
-      //               $zip = app('zip')::open(__DIR__ . '/../../../scripts/' . $software->name . '/' . $localFile);
-      //               $zip->extract(__DIR__ . '/../../../scripts/' . $software->name . '/' . pathinfo($localFile)['filename'], true);
-      //               appendProgressInfo('<i class="fa fa-check"></i>应用包解压完成');
-      //           } catch (Exception $e) {
-      //               appendProgressInfo('<i class="fa fa-close"></i>' . $e->getMessage(), 'danger');
-      //           }
-      //       } else {
-      //           appendProgressInfo('<i class="fa fa-check"></i>检测到本地存在已解压应用包目录.', 'success');
-      //       }
-      //       try {
-      //           appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>上传至 FTP');
-      //           //   var_dump($controller);
-      //           $controller->ftp->putAll(__DIR__ . '/../../../scripts/' . $software->name . '/' . pathinfo($localFile)['filename'], $request->ftp_dir_path);
-      //           appendProgressInfo('<i class="fa fa-check"></i>上传至 FTP', 'success', true);
-      //           updateProgress(50);
-      //       } catch (Exception $e) {
-      //           appendProgressInfo('<i class="fa fa-close"></i>' . $e->getMessage(), 'danger');
-      //       }
-
-      //       //   var_dump($request->all());
-      //       //   var_dump($package);
-      //       //   appendProgressInfo('未检测到本地应用包，连接远程应用包.<i class="spinner-grow spinner-grow-sm"></i>');
-  }
+  
+  //   if ($ftp_connect_error_message === true && $db_connect_error_message === true) {
+  
+  //       $localFile;
+  //       // 检测本地应用包
+  //       foreach ($package['urls'] as $url) {
+  //           $file = $software->name . '-' . $package['version'] . '.zip';
+  //           if (file_exists(__DIR__ . '/../../../scripts/' . $software->name . '/' . $file)) {
+  //               $localFile = $file;
+  //               break;
+  //           }
+  //       }
+  //       if (!empty($localFile)) {
+  //           appendProgressInfo('<i class="fa fa-check"></i>检测到本地应用包.' . $localFile, 'success');
+  //       } else {
+  //           //   appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>未检测到本地应用包');
+  //           appendProgressInfo('未检测到本地应用包');
+  //       }
+  //       // 未检测到本地应用包，下载远程应用包
+  //       if (empty($localFile)) {
+  //           $remoteFile;
+  //           foreach ($package['urls'] as $index => $url) {
+  //               var_dump(pathinfo($url));
+  //               $file = $software->name . '-' . $package['version'] . '.zip';
+  //               appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>连接远程应用包(' . ($index + 1) . '/' . sizeof($package['urls']) . ')');
+  //               $fp_input;
+  //               try {
+  //                   $fp_input = fopen($url, 'r');
+  //                   appendProgressInfo('<i class="fa fa-check"></i>连接远程应用包(' . ($index + 1) . '/' . sizeof($package['urls']) . ')', 'success', true);
+  //                   file_put_contents(__DIR__ . '/../../../scripts/' . $software->name . '/' . $file, $fp_input);
+  //                   $localFile = $file;
+  //                   break;
+  //               } catch (Exception $e) {
+  //                   appendProgressInfo($e->getMessage(), 'danger');
+  //               }
+  //           }
+  //       }
+  //       if (!file_exists(__DIR__ . '/../../../scripts/' . $software->name . '/' . pathinfo($localFile)['filename'])) {
+  //           try {
+  //               appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>解压缩应用包');
+  //               var_dump(__DIR__ . '/../../../scripts/' . $software->name . '/' . $localFile);
+  //               var_dump(pathinfo($localFile));
+  //               $zip = app('zip')::open(__DIR__ . '/../../../scripts/' . $software->name . '/' . $localFile);
+  //               $zip->extract(__DIR__ . '/../../../scripts/' . $software->name . '/' . pathinfo($localFile)['filename'], true);
+  //               appendProgressInfo('<i class="fa fa-check"></i>应用包解压完成');
+  //           } catch (Exception $e) {
+  //               appendProgressInfo('<i class="fa fa-close"></i>' . $e->getMessage(), 'danger');
+  //           }
+  //       } else {
+  //           appendProgressInfo('<i class="fa fa-check"></i>检测到本地存在已解压应用包目录.', 'success');
+  //       }
+  //       try {
+  //           appendProgressInfo('<i class="spinner-grow spinner-grow-sm"></i>上传至 FTP');
+  //           //   var_dump($controller);
+  //           $controller->ftp->putAll(__DIR__ . '/../../../scripts/' . $software->name . '/' . pathinfo($localFile)['filename'], $request->ftp_dir_path);
+  //           appendProgressInfo('<i class="fa fa-check"></i>上传至 FTP', 'success', true);
+  //           updateProgress(50);
+  //       } catch (Exception $e) {
+  //           appendProgressInfo('<i class="fa fa-close"></i>' . $e->getMessage(), 'danger');
+  //       }
+  
+  //       //   var_dump($request->all());
+  //       //   var_dump($package);
+  //       //   appendProgressInfo('未检测到本地应用包，连接远程应用包.<i class="spinner-grow spinner-grow-sm"></i>');
+  //   }
   //   ob_end_flush();
+  
 @endphp
 {{-- $script = '<script>
     appendProgressInfo("%u%", "%u%", );

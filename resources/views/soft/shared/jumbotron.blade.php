@@ -1,19 +1,22 @@
 <div class="section">
   <div class="container">
-    <div class="jumbotron text-center">
-      <h1 style="font-size: 60px;">Typecho</h1>
-      <br>
-      <p class="lead">{{ $config->description }}</p>
+    <div class="jumbotron">
+      <h1 style="font-size: 48px;">{!! $software->name ?? '' !!}</h1>
+      @empty($software->summary)
+      @else
+        <br>
+        <p class="lead">{!! $software->summary ?? '' !!}</p>
+      @endempty
       <hr class="my-4">
-      @foreach ($config->links as $link)
-        <a class="btn btn-primary" href="{{ $link->href }}" target="_blank" role="button">
-          {{ $link->name }}
+      <p>{!! $software->description ?? '' !!}</p>
+
+      @foreach ($software->getLinks() as $link)
+        <a class="btn btn-primary btn-sm {{ $link['class'] ?? '' }}" href="{{ $link['href'] ?? '' }}" target="_blank"
+          role="button">
+          <i class="{{ $link['icon'] ?? '' }}"></i>
+          {{ $link['name'] ?? '' }}
         </a>
       @endforeach
-      <a class="btn btn-primary" href="https://github.com/{{ $config->github }}" target="_blank" role="button">
-        <i class="fab fa-github"></i>
-        GitHub
-      </a>
     </div>
   </div>
 </div>

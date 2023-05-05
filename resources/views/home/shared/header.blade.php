@@ -20,6 +20,12 @@
             <a class="nav-link disabled" href="/template">Template</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link disabled" href="/theme">Theme</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="/plugin">Plugin</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="/about-us">About us</a>
           </li>
           <li class="nav-item">

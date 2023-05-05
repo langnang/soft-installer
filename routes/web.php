@@ -2,7 +2,9 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
+use App\Http\Controllers\SoftwareController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 /*
 |--------------------------------------------------------------------------
@@ -20,21 +22,16 @@ $router->get('/', function () use ($router) {
 });
 $router->group(['prefix' => 'software'], function () use ($router) {
     $router->get('/', function (Request $request) use ($router) {
-        // $softwares = app('software')->getSubClass();
         $categories = app('software')->getCategorySubClass();
         return view('soft.index', ["categories" => $categories]);
     });
     $router->get('/{software}', function ($software, Request $request) use ($router) {
         $software = app('software')->getSubClass($software);
         $package = $software->getPackage($request->version);
-        // var_dump(class_exists('PharData'));
-        // var_dump(\App\Http\Controllers\SoftwareController::get_zip_extension('1.1.17.10.30.-release.tar.gz'));
-        // $config = \App\Http\Controllers\Soft\TypechoController::get_config($software);
-        // $package = \App\Http\Controllers\SoftwareController::get_package($software, $request->version);
         $view = 'soft.install';
-        if (View::exists('soft.' . $software->name)) {
-            $view = 'soft.' . $software->name;
-        }
+        // var_dump($software);
+        // 自定义视图
+        if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [
             'request' => $request,
             'software' => $software,
@@ -42,50 +39,35 @@ $router->group(['prefix' => 'software'], function () use ($router) {
         ]);
     });
     $router->post('/{software}', function ($software, Request $request) use ($router) {
-        // $request['script_name'] = $software;
+        var_dump($request->all());
         $software = app('software')->getSubClass($software);
         $package = $software->getPackage($request->version);
-        // $config = App\Http\Controllers\SoftwareController::get_config($soft);
-        // $package = App\Http\Controllers\SoftwareController::get_package($soft, $request->version);
-        // $controller = new \App\Http\Controllers\SoftwareController($request);
+        $software->setDbConfig([
+            'driver' => $request->input('db_driver', 'mysql'),
+            'host' => $request->input('db_host'),
+            'port' => $request->input('db_port', 3306),
+            'username' => $request->input('db_username'),
+            'password' => $request->input('db_password'),
+            'database' => $request->input('db_database'),
+            'prefix' => $request->input('db_prefix'),
+        ]);
+        $software->setFtpConfig([
+            'host' => $request->input('ftp_host'),
+            'port' => $request->input('ftp_port', 21),
+            'username' => $request->input('ftp_username'),
+            'password' => $request->input('ftp_password'),
+            'path' => $request->input('ftp_dir_path'),
+        ]);
         // 连接FTP
-        $ftp_connect_error_message = $software->ftp_connect($request);
-        // var_dump($ftp_connect_error_message);
+        // $ftp_connect_error_message = $software->ftp_connect($request);
         // 连接MySQL
-        $db_connect_error_message = $software->db_connect($request);
-        // var_dump($db_connect_error_message);
-        // $software->seeder_run();
-        // return;
-        // if ($ftp_connect_error_message === true) {
-        // $request['zip_name'] = $soft . '-' . $request->version . '.' . pathinfo($package->package_url)['extension'];
-        // $controller->download_package($request);
-
-        // $controller->unzip_package($request);
-
-        // $controller->ftp_upload_package($request);
-        // }
-        // var_dump($request->all());
-        // // var_dump(app('zip'));
-        // $zip = app('zip')::open(__DIR__ . '/../scripts/typecho/typecho.zip');
-        // var_dump($zip);
-        // // var_dump($zip->listFiles());
-        // // $zip->extract('/../scripts/typecho/', true);
-        // var_dump($zip->extract(__DIR__ . '/../scripts/typecho/v1.2'));
-
-        // $controller->ftp_upload_package('/');
-        // $ftp->copy(__DIR__ . '/../scripts/typecho/v1.2', '/',);
-        // var_dump($config);
-        // var_dump($package);
+        // $db_connect_error_message = $software->db_connect($request);
         $view = 'soft.install';
-        if (View::exists('soft.' . $software->name)) {
-            $view = 'soft.' . $software->name;
-        }
+        if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [
             'request' => $request,
             'software' => $software,
             'package' => $package,
-            'ftp_connect_error_message' => $ftp_connect_error_message,
-            'db_connect_error_message' => $db_connect_error_message,
         ]);
     });
 });

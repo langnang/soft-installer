@@ -3,6 +3,6 @@
     <div class="title-section">
       <h2>Statement</h2>
     </div>
-    <p class="lead">{!! $config->statement !!}</p>
+    <p class="lead">{!! $software->statement !!}</p>
   </div>
 </div>

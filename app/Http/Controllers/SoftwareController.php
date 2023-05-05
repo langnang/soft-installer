@@ -6,14 +6,18 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
+
+use function PHPUnit\Framework\returnSelf;
 
 class SoftwareController extends Controller
 {
-    public $name;
-    public $description;
-    public $packages;
-    public $package;
+    use \App\Traits\Software\SoftwareTrait;
+    use \App\Traits\Software\SoftwarePackageTrait;
+    use \App\Traits\Software\SoftwareFtpTrait;
+    use \App\Traits\Software\SoftwareDbTrait;
+
     public $root_path = "scripts";
 
     public static $config_file = "config.json";
@@ -23,265 +27,111 @@ class SoftwareController extends Controller
     public static $scripts;
 
     public $script;
-    public $github;
-    public $request;
-    public $local;
-    public $ftp;
-    public $db;
-    public $app;
-    public $connection;
-    public $Schema;
-    public $faker;
+
+    private $local;
+    private $request;
+
+    private $faker;
+    // 校验码
+    private $token;
+
+    public $on_start;
+    public $on_generate_config_file;
+    public $on_end;
+    private $config;
+    private $app;
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct($app)
+    public function __construct($config = [], $mini = false)
     {
-        $this->app = $app;
-        $this->db = app('db');
-        $this->faker = app('Faker\Generator');
-        $this->ftp = new \FtpClient\FtpClient();
-        $this->local = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path));
-        // $this->request = $request;
+        var_dump(__METHOD__);
+        // 绑定到 Application
+        if ($config instanceof \Laravel\Lumen\Application) {
+            $this->app = $config;
+            return;
+        }
+        $this->config = $config;
+        $this->software_construct($config, $mini);
+        if ($mini) return;
+        $this->software_package_construct($config);
+        $this->software_ftp_construct($config);
+        $this->software_db_construct($config);
+
+        // \App\Traits\Software\SoftwareFtpTrait::__construct();
+        // if ($config instanceof \Laravel\Lumen\Application) $this->app = $config;
+        // if ($config instanceof \Illuminate\Http\Request) $this->request = $config;
+        // $this->db = app('db');
+        // $this->faker = app('Faker\Generator');
+        // $this->local = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path));
     }
-    // 获取继承的子类
-    public function getSubClass($name = null)
+    public function setToken()
     {
-        $classes = parent::getSubClass();
-        $result = [];
-        foreach ($classes as  $class) {
-            if (!$class instanceof \App\Http\Controllers\SoftwareController) {
-                $class = new $class($this);
-                if (!empty($name) && $class->name === $name) {
-                    return $class;
+        var_dump(__METHOD__);
+        $this->token = md5(json_encode([
+            "ftp_config" => $this->ftp_config,
+            "db_config" => $this->db_config,
+        ]));
+    }
+    // 创建配置文件
+    public function generate_config_files()
+    {
+        var_dump(__METHOD__);
+        $files = array_merge($this->config['files'], $this->package['files']);
+
+        foreach ($files as $file) {
+            $path = 'scripts/' . $this->package['local_dir'] . '/' . $file['path'];
+            $content = str_replace([
+                '{{ftp.host}}',
+                '{{ftp.port}}',
+                '{{ftp.username}}',
+                '{{ftp.password}}',
+            ], [
+                $this->ftp_config['host'],
+                $this->ftp_config['port'],
+                $this->ftp_config['username'],
+                $this->ftp_config['password'],
+            ], $file['content']);
+            if ($this->on_generate_config_file) {
+                $result = call_user_func($this->on_generate_config_file, $path, $content, ['ftp' => $this->package['ftp_config']], $this);
+                if (!empty($result)) {
+                    $content = $result;
                 }
-                $result[$class->name] = $class;
+                unset($result);
             }
+            app('files')->put($path, $content);
         }
-        return $result;
-    }
-
-    public function getCategorySubClass()
-    {
-        $classes = $this->getSubClass();
-        $result = [];
-        foreach ($classes as $class) {
-            $category = $class->category;
-            if (empty($category)) $category = 'unknown';
-            if (!isset($result[$category])) $result[$category] = [];
-            array_push($result[$category], $class);
-        }
-        return $result;
-    }
-
-    public function getPackage($version = null)
-    {
-        if (empty($version)) return;
-        foreach ($this->packages as $package) {
-            if ($package['version'] == $version) {
-                $this->package = $package;
-                return $package;
-            }
-        }
-    }
-    // public static function load_scripts()
-    // {
-    //     var_dump(__METHOD__);
-    //     $adapter = new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path);
-    //     $filesystem = new \League\Flysystem\Filesystem($adapter);
-    //     $scripts = [];
-    //     /** @var \League\Flysystem\StorageAttributes $item */
-    //     foreach ($filesystem->listContents('') as $item) {
-    //         $path = $item->path();
-    //         if ($item instanceof \League\Flysystem\FileAttributes) {
-    //             // handle the file
-    //         } elseif ($item instanceof \League\Flysystem\DirectoryAttributes) {
-    //             $configPath = $path . '/' . self::$config_file;
-    //             $controllerPath = $path . '/' . self::$controller_file;
-    //             if ($filesystem->fileExists($configPath)) {
-    //                 $config = json_decode($filesystem->read($configPath));
-    //                 $config->dirname = $path;
-    //                 var_dump($config);
-    //                 array_push($scripts, $config);
-    //             }
-    //             if ($filesystem->fileExists($configPath)) {
-    //                 require_once __DIR__ . '/../../../' . $this->root_path . '/' . $controllerPath;
-    //             }
-    //             // handle the directory
-    //         }
-    //     }
-    //     self::$scripts = $scripts;
-    //     return $scripts;
-    // }
-    // public function get_scripts()
-    // {
-    //     $filesystem = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path));
-    //     $scripts = [];
-    //     /** @var \League\Flysystem\StorageAttributes $item */
-    //     foreach ($filesystem->listContents('') as $item) {
-    //         $path = $item->path();
-    //         if ($item instanceof \League\Flysystem\FileAttributes) {
-    //             // handle the file
-    //         } elseif ($item instanceof \League\Flysystem\DirectoryAttributes) {
-    //             $configPath = $path . '/' . self::$config_file;
-    //             if ($filesystem->fileExists($configPath)) {
-    //                 $config = json_decode($filesystem->read($configPath));
-    //                 $config->dirname = $path;
-    //                 array_push($scripts, $config);
-    //             }
-    //             // handle the directory
-    //         }
-    //     }
-    //     return $scripts;
-    // }
-
-    // public function get_config($name)
-    // {
-    //     $filesystem = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path));
-    //     if ($filesystem->fileExists($name . '/' . self::$config_file)) {
-    //         $config = json_decode($filesystem->read($name . '/' . self::$config_file));
-    //         return $config;
-    //     } else {
-    //         return;
-    //     }
-    // }
-    // public function get_package($name, $version)
-    // {
-    //     $config = self::get_config($name);
-    //     // 默认选中唯一安装包
-    //     if (count($config->packages) == 1) return $config->packages[0];
-    //     else if (!empty($version)) {
-    //         foreach ($config->packages as $item) {
-    //             if ($item->version === $version) {
-    //                 return $item;
-    //             }
-    //         }
-    //     }
-    //     return;
-    // }
-    // 连接 FTP
-    public function ftp_connect(Request $request)
-    {
-        if (!empty($request->ftp_host) && !empty($request->ftp_port) && !empty($request->ftp_username) && !empty($request->ftp_password)) {
-            try {
-                $this->ftp->connect($request->ftp_host, false, $request->ftp_port);
-                $this->ftp->login($request->ftp_username, $request->ftp_password);
-            } catch (Exception $e) {
-                return $e->getMessage();
-            }
-            // 连接成功
-            return true;
-        }
-        return false;
-    }
-    // 连接 MySQL
-    public function db_connect(Request $request)
-    {
-        if (!empty($request->db_host) && !empty($request->db_username) && !empty($request->db_password) && !empty($request->db_database) && !empty($request->db_port)) {
-            try {
-                app('config')->set('database.connections.' . $this->name, [
-                    'driver' => $request->db_driver,
-                    'host' => $request->db_host,
-                    'database' => $request->db_database,
-                    'username' => $request->db_username,
-                    'password' => $request->db_password,
-                    'prefix' => $request->db_table_prefix
-                ]);
-                $this->connection = DB::connection($this->name);
-
-                $this->connection->select('show databases');
-
-                $this->Schema = Schema::connection($this->name);
-            } catch (Exception $e) {
-                return $e->getMessage();
-            }
-            // 连接成功
-            return true;
-        }
-        return false;
-    }
-    // 检测存在本地安装包
-    public function get_local_package($callback = null)
-    {
-        foreach ($this->package['urls'] as $url) {
-            $extension = $this->get_zip_extension($url);
-            $file = $this->name . '-' . $this->package['version'] . '.' . $extension;
-            $path = $this->name . '/' . $file;
-            if ($this->local->fileExists($path)) {
-                $this->package['local_file'] = $path;
-                return $path;
-            }
-        }
-        return;
-    }
-    // 下载应用包
-    public function download_package($url, $callback = null)
-    {
-        $extension = $this->get_zip_extension($url);
-        $path = $this->name . '/' . $this->name . '-' . $this->package['version'] . '.' . $extension;
-        $file = fopen($url, 'r');
-        if (empty($file)) {
-            throw new Exception("Unable to open file!");
-        }
-        $this->local->writeStream($path, $file);
-        $this->package['local_file'] = $path;
-        return $path;
-    }
-    // 解压缩应用包
-    public function unzip_package()
-    {
-        $extension = $this->get_zip_extension($this->package['local_file']);
-        $this->package['local_dir'] = $this->name . '/' . $this->name . '-' . $this->package['version'];
-        $file_path = __DIR__ . '/../../../' . $this->root_path . '/' . $this->package['local_file'];
-        $dir_path = __DIR__ . '/../../../' . $this->root_path . '/' . $this->package['local_dir'];
-        if (in_array($extension, ['tar.gz'])) {
-            $zip = new \PharData($file_path);
-            //解压后的路径 数组或者字符串指定解压解压的文件，null为全部解压  是否覆盖
-            $zip->extractTo($dir_path, null, true);
-        } else {
-            $zip = app('zip')::open($file_path);
-            $zip->extract($dir_path, true);
-        }
-        return $this->package['local_dir'];
-    }
-    // 上传应用
-    public function ftp_upload_package($target_directory)
-    {
-        // var_dump($this->package);
-        // $filename = pathinfo($request->zip_name)['filename'];
-        $this->ftp->putAll(__DIR__ . '/../../../' . $this->root_path . '/' . $this->package['local_dir'] . '/' . $this->package['root_path'], $target_directory);
+        // var_dump($files);
     }
     public function install()
     {
-    }
-    // 获取压缩包文件格式
-    public static function get_zip_extension($path)
-    {
-        $types = ['7z', 'rar', 'zip', 'tar', 'tar.gz'];
-        foreach ($types as $type) {
-            if (substr($path, -strlen($type)) === $type) {
-                return $type;
-                break;
-            }
+        var_dump(__METHOD__);
+        // set_time_limit(0); //设置程序执行时间
+        // ignore_user_abort(true); //设置断开连接继续执行
+        // header('X-Accel-Buffering: no'); //关闭buffer
+        // ob_start(); //打开输出缓冲控制
+        if ($this->on_start) {
+            $return = call_user_func($this->on_start, $this);
+            unset($return);
         }
-        return false;
-    }
+        if (!$this->db_connect()) return;
+        // 链接 FTP
+        if (!$this->ftp_connect()) return;
 
-    public function migration_up()
-    {
-    }
-    public function migration_down()
-    {
-    }
-    public function factory_definition()
-    {
-    }
-    public function factory_unverified()
-    {
-    }
-    public function seeder_run()
-    {
+        $this->setToken();
+
+        // 应用包
+        $local_package = $this->get_local_package();
+        if (empty($local_package)) {
+            $local_package = $this->download_package();
+        }
+        // 解压应用包
+        $directory_package = $this->unzip_package($local_package);
+
+        $this->generate_config_files();
+
+        $this->ftp_upload($directory_package);
     }
 }

@@ -14,13 +14,22 @@
         <div class="row first-row">
           @foreach ($softwares as $software)
             <div class="col-md-3">
-              <a href='/software/{{ $software->name }}' class="entry aos-init aos-animate" data-aos="zoom-in">
-                @if (array_key_exists('icon', $software->logo))
-                  <i class="{{ $software->logo['icon'] }}"></i>
-                @elseif (array_key_exists('img', $software->logo))
-                  <img src="/public/images/brands/{{ $software->logo['img'] }}" alt="">
-                @endif
-                <h5>{{ substr(basename(get_class($software)), 0, -10) }}</h5>
+              <a href='/software/{{ $software->getSlug() }}' class="entry aos-init aos-animate" data-aos="zoom-in">
+                @isset($software->logo)
+                  @if (isset($software->logo['icon']) && !empty($software->logo['icon']))
+                    <i class="{{ $software->logo['icon'] }}"></i>
+                  @elseif (isset($software->logo['file']) && !empty($software->logo['file']))
+                    <img src="/public/images/brands/{{ $software->logo['file'] }}" alt="">
+                  @elseif (isset($software->logo['img']) && !empty($software->logo['img']))
+                    <img src="/public/images/brands/{{ $software->logo['img'] }}" alt="">
+                  @elseif (isset($software->logo['svg']) && !empty($software->logo['svg']))
+                    <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="75"
+                      height="75">
+                      {!! $software->logo['svg'] !!}
+                    </svg>
+                  @endif
+                @endisset
+                <h5>{{ $software->name }}</h5>
               </a>
             </div>
           @endforeach
