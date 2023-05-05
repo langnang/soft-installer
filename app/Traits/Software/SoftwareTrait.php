@@ -8,6 +8,8 @@ trait SoftwareTrait
     public $name;
     // 标识
     public $slug;
+    // 状态 ['public', 'private', 'protected']
+    public $status = "public";
     // 徽标
     public $logo = [
         "icon" => null,
@@ -35,6 +37,7 @@ trait SoftwareTrait
 
         $this->name = isset($config['name']) ? $config['name'] : $this->name;
         $this->slug = isset($config['slug']) ? $config['slug'] : $this->slug;
+        $this->status = isset($config['status']) ? $config['status'] : $this->status;
         $this->logo = isset($config['logo']) ? $config['logo'] : $this->logo;
         $this->category = isset($config['category']) ? $config['category'] : $this->category;
         if ($mini) return;
@@ -48,7 +51,7 @@ trait SoftwareTrait
     // 获取继承的子类
     public function getSubClass($slug = null)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $classes = [];
         if (app('files')->exists(env('SOFTWARE_LOCAL_FILE'))) {
             $classes = array_merge($classes, json_decode(app('files')->get(env('SOFTWARE_LOCAL_FILE')), true));
@@ -57,7 +60,7 @@ trait SoftwareTrait
         foreach ($classes as  $class) {
             // 跳过没有名称(name)的
             if (!isset($class['name']) || empty($class['name'])) continue;
-            var_dump($class['name']);
+            // var_dump($class['name']);
             $class = new $this($class, empty($slug));
             if (!empty($slug) && $class->getSlug() === $slug) return $class;
             $result[$class->getSlug()] = $class;
@@ -67,7 +70,7 @@ trait SoftwareTrait
 
     public function getCategorySubClass()
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $classes = $this->getSubClass();
         $result = [];
         foreach ($classes as $class) {

@@ -38,8 +38,8 @@ class SoftwareController extends Controller
     public $on_start;
     public $on_generate_config_file;
     public $on_end;
-    private $config;
-    private $app;
+    public $config;
+    public $app;
     /**
      * Create a new controller instance.
      *
@@ -47,7 +47,7 @@ class SoftwareController extends Controller
      */
     public function __construct($config = [], $mini = false)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         // 绑定到 Application
         if ($config instanceof \Laravel\Lumen\Application) {
             $this->app = $config;
@@ -69,16 +69,27 @@ class SoftwareController extends Controller
     }
     public function setToken()
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $this->token = md5(json_encode([
             "ftp_config" => $this->ftp_config,
             "db_config" => $this->db_config,
         ]));
     }
+    public function has($key)
+    {
+        switch ($key) {
+            case 'ftp':
+                return !empty($this->packages);
+            case 'db':
+                return !empty($this->package['database']) || !empty($this->config['database']);
+            default:
+                break;
+        }
+    }
     // 创建配置文件
     public function generate_config_files()
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $files = array_merge($this->config['files'], $this->package['files']);
 
         foreach ($files as $file) {
@@ -107,7 +118,7 @@ class SoftwareController extends Controller
     }
     public function install()
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         // set_time_limit(0); //设置程序执行时间
         // ignore_user_abort(true); //设置断开连接继续执行
         // header('X-Accel-Buffering: no'); //关闭buffer
@@ -116,22 +127,22 @@ class SoftwareController extends Controller
             $return = call_user_func($this->on_start, $this);
             unset($return);
         }
-        if (!$this->db_connect()) return;
+        // if (!$this->db_connect()) return;
         // 链接 FTP
         if (!$this->ftp_connect()) return;
 
         $this->setToken();
 
         // 应用包
-        $local_package = $this->get_local_package();
+        $local_package = $this->get_local_package($this->getSlug());
         if (empty($local_package)) {
-            $local_package = $this->download_package();
+            $local_package = $this->download_package($this->getSlug());
         }
         // 解压应用包
-        $directory_package = $this->unzip_package($local_package);
+        $directory_package = $this->unzip_package($this->getSlug(), $this->token, $local_package);
+        var_dump($directory_package);
+        // $this->generate_config_files();
 
-        $this->generate_config_files();
-
-        $this->ftp_upload($directory_package);
+        $this->ftp_upload($directory_package, $this->package['directory']);
     }
 }

@@ -20,13 +20,13 @@ trait SoftwareFtpTrait
 
     public function software_ftp_construct($config = [])
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         // $this->ftp = new \FtpClient\FtpClient();
         // $this->ftp_config = isset($config['ftp_config']) ? $config['ftp_config'] : $this->ftp_config;
     }
     public function setFtpConfig($config)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $this->ftp_config['host'] = isset($config['host']) ? $config['host'] : $this->ftp_config['host'];
         $this->ftp_config['port'] = isset($config['port']) ? $config['port'] : $this->ftp_config['port'];
         $this->ftp_config['username'] = isset($config['username']) ? $config['username'] : $this->ftp_config['username'];
@@ -35,7 +35,7 @@ trait SoftwareFtpTrait
     }
     public function getFtpConfig($key = null)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         if (empty($key)) return $this->ftp_config;
         return $this->ftp_config[$key];
     }
@@ -44,16 +44,16 @@ trait SoftwareFtpTrait
      */
     public function canFtpConnect()
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
     }
 
     // 连接 FTP
     public function ftp_connect()
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         var_dump($this->ftp_config);
         if (empty($this->ftp_config['host']) || empty($this->ftp_config['port']) || empty($this->ftp_config['username']) || empty($this->ftp_config['password'])) {
-            // $this->ftp_connect_status = 0;
+            $this->ftp_connect_status = 0;
         } else {
             try {
                 app('ftp')->connect($this->ftp_config['host'], false, $this->ftp_config['port']);
@@ -71,17 +71,21 @@ trait SoftwareFtpTrait
         return $this->ftp_connect_status;
     }
 
-    // 上传应用
-    public function ftp_upload($local_directory)
+    /**
+     * 上传应用
+     * @var string $local_directory 本地解压目录
+     * @var string $directory 相对目录
+     */
+    public function ftp_upload($local_directory, $directory = "/")
     {
-        var_dump(__METHOD__);
+        var_dump([__METHOD__, $local_directory, $directory]);
         $status = null;
         try {
-            app('ftp')->putAll(__DIR__ . '/../../../' . $this->root_path . '/' . $this->package['local_dir'] . '/' . $this->package['directory'], $this->ftp_config['path']);
+            app('ftp')->putAll(__DIR__ . '/../../../' . $local_directory . $directory, $this->ftp_config['path']);
             // 上传完成后删除本地解压目录
-            $this->local->deleteDirectory($this->package['local_dir']);
+            app('files')->deleteDirectory($local_directory);
         } catch (\Exception $e) {
-            $status = $e->getMessage();
+            $status = $e->getCode();
         }
 
         if ($this->on_ftp_upload) {

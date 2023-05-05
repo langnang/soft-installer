@@ -99,7 +99,7 @@
     <div class="form-group">
       <label>Table Prefix</label>
       <input type="text" class="form-control" name="db_table_prefix" placeholder="Table Prefix"
-        value="{{ $request->input('db_table_prefix', $software->name . '_') }}">
+        value="{{ $request->input('db_table_prefix', $software->getSlug() . '_') }}">
     </div>
   </div>
 </div>

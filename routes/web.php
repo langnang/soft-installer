@@ -49,7 +49,7 @@ $router->group(['prefix' => 'software'], function () use ($router) {
             'username' => $request->input('db_username'),
             'password' => $request->input('db_password'),
             'database' => $request->input('db_database'),
-            'prefix' => $request->input('db_prefix'),
+            'prefix' => $request->input('db_table_prefix'),
         ]);
         $software->setFtpConfig([
             'host' => $request->input('ftp_host'),

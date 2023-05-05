@@ -16,7 +16,7 @@ trait SoftwarePackageTrait
 
     public function software_package_construct($config = [])
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $this->packages = isset($config['packages']) ? $config['packages'] : $this->packages;
     }
     public function getPackage($version = null)
@@ -37,15 +37,17 @@ trait SoftwarePackageTrait
         return $this->package;
     }
 
-    // 检测存在本地安装包
-    public function get_local_package($callback = null)
+    /**
+     * 检测存在本地安装包
+     */
+    public function get_local_package($slug, $callback = null)
     {
-        var_dump(__METHOD__);
+        var_dump([__METHOD__, $slug]);
         foreach ($this->package['urls'] as $url) {
             $extension = $this->get_zip_extension($url);
-            $file = $this->getSlug() . '-' . $this->package['version'] . '.' . $extension;
-            $path = $this->getSlug() . '/' . $file;
-            if ($this->local->fileExists($path)) {
+            $file = $slug . '-' . $this->package['version'] . '.' . $extension;
+            $path = env('SOFTWARE_ROOT') . '/' . $slug . '/' . $file;
+            if (app('files')->exists($path)) {
                 $this->package['local_file'] = $path;
                 break;
             }
@@ -57,7 +59,7 @@ trait SoftwarePackageTrait
         return $this->package['local_file'];
     }
     // 下载应用包
-    public function download_package($callback = null)
+    public function download_package($slug, $callback = null)
     {
         var_dump(__METHOD__);
         foreach ($this->package['urls'] as $url) {
@@ -78,13 +80,13 @@ trait SoftwarePackageTrait
         return $this->package['local_file'];
     }
     // 解压缩应用包
-    public function unzip_package($package = null, $path = null)
+    public function unzip_package($slug, $token, $package = null, $path = null)
     {
-        var_dump(__METHOD__);
+        var_dump([__METHOD__, $slug, $token]);
         $extension = $this->get_zip_extension($this->package['local_file']);
-        $this->package['local_dir'] = $this->getSlug() . '/' . $this->getSlug() . '-' . $this->package['version'] . "." . $this->token;
-        $file_path = __DIR__ . '/../../../' . $this->root_path . '/' . $this->package['local_file'];
-        $dir_path = __DIR__ . '/../../../' . $this->root_path . '/' . $this->package['local_dir'];
+        $this->package['local_dir'] = env('SOFTWARE_ROOT') . '/' . $slug . '/' . $slug . '-' . $this->package['version'] . "." . $token;
+        $file_path = __DIR__ . '/../../../' . $this->package['local_file'];
+        $dir_path = __DIR__ . '/../../../' . $this->package['local_dir'];
         if (in_array($extension, ['tar.gz'])) {
             $zip = new \PharData($file_path);
             //解压后的路径 数组或者字符串指定解压解压的文件，null为全部解压  是否覆盖
@@ -94,7 +96,7 @@ trait SoftwarePackageTrait
             $zip->extract($dir_path, true);
         }
         // 更新 filesystem
-        $this->local = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path . '/' . $this->package['local_dir']));
+        // $this->local = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path . '/' . $this->package['local_dir']));
         if ($this->on_unzip_package) {
             $return = call_user_func($this->on_unzip_package, $this->package['local_dir'], $this->package, $this);
             unset($return);
@@ -105,7 +107,7 @@ trait SoftwarePackageTrait
     // 获取压缩包文件格式
     public static function get_zip_extension($path)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $types = ['7z', 'rar', 'zip', 'tar', 'tar.gz'];
         foreach ($types as $type) {
             if (substr($path, -strlen($type)) === $type) {

@@ -4,7 +4,6 @@
 @include('home.shared.head')
 
 <body>
-
   @include('home.shared.header')
 
   <main class="container" style="min-height:calc(100vh - 265px);">
@@ -13,11 +12,11 @@
 
         @include('soft.shared.jumbotron')
         <section name="progress">
-          @if ($request->method() === 'POST')
-            {{-- @if (isset($ftp_connect_error_message) && $ftp_connect_error_message === true && isset($db_connect_error_message) && $db_connect_error_message === true)
+          {{-- @if (isset($ftp_connect_error_message) && $ftp_connect_error_message === true && isset($db_connect_error_message) && $db_connect_error_message === true)
           @include('soft.shared.progress')
           @include('shared.result')
         @else --}}
+          @if ($request->method() === 'POST')
             @include('soft.shared.progress')
             @include('shared.result')
           @endif
@@ -41,18 +40,21 @@
 
             @include('soft.shared.ftp')
 
-            {{-- @include('soft.shared.database') --}}
+            @if ($software->has('db'))
+              @include('soft.shared.database')
+            @endif
 
             {{-- @include('soft.shared.administrator') --}}
+            <div class="section" name="submit">
+              <div class="container text-center">
+                <button class="button" type="submit">Submit</button>
+              </div>
+            </div>
           @endempty
 
         </section>
         {{-- @endif --}}
-        <div class="section" name="submit">
-          <div class="container text-center">
-            <button class="button" type="submit">Submit</button>
-          </div>
-        </div>
+
       </form>
     @show
   </main>
@@ -73,12 +75,16 @@
 </body>
 
 </html>
+
 @php
   set_time_limit(0); //设置程序执行时间
   ignore_user_abort(true); //设置断开连接继续执行
   header('X-Accel-Buffering: no'); //关闭buffer
   ob_start(); //打开输出缓冲控制
   if ($request->method() === 'POST') {
+      echo '<script>
+        localStorage.setItem("SoftInstaller", JSON.stringify('.json_encode($request->all()).'))
+      </script>';
       $software->on_start = function ($software) {
           appendProgressInfo('连接 FTP.');
       };
@@ -96,7 +102,7 @@
               appendProgressInfo('未检测到本地应用包', 'danger', true);
               appendProgressInfo('连接远程应用包.');
           } else {
-              appendProgressInfo('检测到本地应用包.  ' . basename($path), 'success', true);
+              appendProgressInfo('检测到本地应用包. ' . basename($path), 'success', true);
               appendProgressInfo('解压缩当前应用包.');
           }
       };
@@ -113,6 +119,7 @@
           if (empty($status)) {
               appendProgressInfo('上传至 FTP 服务器.', 'success', true);
           } else {
+              appendProgressInfo('上传至 FTP 服务器.', 'danger', true);
           }
       };
       $software->install();

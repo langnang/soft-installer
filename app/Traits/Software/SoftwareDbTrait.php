@@ -43,12 +43,12 @@ trait SoftwareDbTrait
 
     public function software_db_construct($config = [])
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         // $this->db_config = isset($config['db_config']) ? $config['db_config'] : $this->db_config;
     }
     public function setDbConfig($config)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $this->db_config['driver'] = isset($config['driver']) ? $config['driver'] : $this->db_config['driver'];
         $this->db_config['host'] = isset($config['host']) ? $config['host'] : $this->db_config['host'];
         $this->db_config['port'] = isset($config['port']) ? $config['port'] : $this->db_config['port'];
@@ -59,7 +59,7 @@ trait SoftwareDbTrait
     }
     public function getDbConfig($key = null)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         if (empty($key)) return $this->db_config;
         return $this->db_config[$key];
     }
@@ -68,12 +68,12 @@ trait SoftwareDbTrait
      */
     public function canDbConnect()
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
     }
     // 连接 MySQL
     public function db_connect(\Illuminate\Http\Request $request = null)
     {
-        var_dump(__METHOD__);
+        // var_dump(__METHOD__);
         $request = empty($request) ? $this->request : $request;
         if (empty($request)) return false;
         if (!empty($request->db_host) && !empty($request->db_username) && !empty($request->db_password) && !empty($request->db_database) && !empty($request->db_port)) {
