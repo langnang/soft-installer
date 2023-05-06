@@ -50,8 +50,8 @@ $router->group(['prefix' => 'software'], function () use ($router) {
             'path' => $request->input('ftp_dir_path'),
         ]);
         // 连接FTP
-        $ftp_connect_error_message = $software->ftp_connect();
-        $db_connect_error_message = null;
+        $ftp_connect_status = $software->ftp_connect($software->getSlug());
+        $db_connect_status = null;
         if ($software->has('db')) {
             $software->setDbConfig([
                 'driver' => $request->input('db_driver', 'mysql'),
@@ -63,20 +63,20 @@ $router->group(['prefix' => 'software'], function () use ($router) {
                 'prefix' => $request->input('db_table_prefix'),
             ]);
             // 连接MySQL
-            $db_connect_error_message = $software->db_connect($software->getSlug());
+            $db_connect_status = $software->db_connect($software->getSlug());
         }
 
 
 
-        var_dump([$ftp_connect_error_message, $db_connect_error_message,]);
+        var_dump([$ftp_connect_status, $db_connect_status,]);
         $view = 'soft.install';
         if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [
             'request' => $request,
             'software' => $software,
             'package' => $package,
-            'ftp_connect_error_message' => $ftp_connect_error_message,
-            'db_connect_error_message' => $db_connect_error_message,
+            'ftp_connect_status' => $ftp_connect_status,
+            'db_connect_status' => $db_connect_status,
         ]);
     });
 });

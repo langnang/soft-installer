@@ -3,9 +3,9 @@
     <div class="title-section">
       <h2>Database</h2>
     </div>
-    @if (isset($db_connect_error_message) && is_string($db_connect_error_message))
+    @if (isset($db_connect_status) && $db_connect_status !== true)
       <div class="alert alert-danger" role="alert">
-        {!! $db_connect_error_message !!}
+        database connect error.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

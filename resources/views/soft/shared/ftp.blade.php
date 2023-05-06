@@ -3,9 +3,9 @@
       <div class="title-section">
         <h2>Remote FTP</h2>
       </div>
-      @if (isset($ftp_connect_error_message) && is_string($ftp_connect_error_message))
+      @if (isset($ftp_connect_status) && $ftp_connect_status !== true)
         <div class="alert alert-danger" role="alert">
-          {{ $ftp_connect_error_message }}
+          ftp connect error.
           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>

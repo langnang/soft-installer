@@ -128,12 +128,12 @@ class SoftwareController extends Controller
             unset($return);
         }
         // 链接 FTP
-        if (!$this->ftp_connect()) return;
+        if (!$this->ftp_connect($this->getSlug())) return;
 
+        // 存在则链接 DB
         if ($this->has('db')) {
             if (!$this->db_connect($this->getSlug())) return;
         }
-
 
         $this->setToken();
 

@@ -15,10 +15,9 @@ trait SoftwareDbTrait
         ]
     ];
 
-    protected $db;
-    protected $connection;
     protected $Schema;
-
+    private $db;
+    private $db_slug;
     private $db_config = [
         "driver" => 'mysql',
         "host" => null,
@@ -44,7 +43,7 @@ trait SoftwareDbTrait
     public function software_db_construct($config = [])
     {
         // var_dump(__METHOD__);
-        // $this->db_config = isset($config['db_config']) ? $config['db_config'] : $this->db_config;
+        $this->db_config = isset($config['db_config']) ? $config['db_config'] : $this->db_config;
     }
     public function setDbConfig($config)
     {
@@ -77,29 +76,30 @@ trait SoftwareDbTrait
     // 连接 MySQL
     public function db_connect($slug)
     {
-        // var_dump(__METHOD__);
-        if (!$this->canDbConnect()) {
-            $this->db_connect_status = 0;
-        } else {
-            try {
-                app('config')->set('database.connections.' . $slug, [
-                    'driver' => $this->db_config['driver'],
-                    'host' => $this->db_config['host'],
-                    'database' => $this->db_config['port'],
-                    'username' => $this->db_config['username'],
-                    'password' => $this->db_config['password'],
-                    'prefix' => $this->db_config['prefix']
-                ]);
-                $this->connection = \Illuminate\Support\Facades\DB::connection($slug);
-
-                $this->connection->select('show databases');
-
-                $this->Schema = \Illuminate\Support\Facades\Schema::connection($slug);
-            } catch (\Exception $e) {
-                $this->db_connect_status = $e->getCode();
+        // 标识不一致 或 状态码非TRUE
+        if ($this->db_slug !== $slug || $this->db_connect_status !== true) {
+            $this->db_slug = $slug;
+            // var_dump(__METHOD__);
+            if (!$this->canDbConnect()) {
+                $this->db_connect_status = false;
+            } else {
+                try {
+                    app('config')->set('database.connections.' . $slug, [
+                        'driver' => $this->db_config['driver'],
+                        'host' => $this->db_config['host'],
+                        'database' => $this->db_config['port'],
+                        'username' => $this->db_config['username'],
+                        'password' => $this->db_config['password'],
+                        'prefix' => $this->db_config['prefix']
+                    ]);
+                    $this->db = \Illuminate\Support\Facades\DB::connection($slug);
+                    $this->db->select('show databases');
+                    $this->Schema = \Illuminate\Support\Facades\Schema::connection($slug);
+                    $this->db_connect_status = true;
+                } catch (\Exception $e) {
+                    $this->db_connect_status = $e->getCode();
+                }
             }
-            // 连接成功
-            return true;
         }
         if ($this->on_db_connect) {
             $return = call_user_func($this->on_db_connect, $this->db_connect_status, $this->db_config, $this);

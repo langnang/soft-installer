@@ -1,6 +1,6 @@
 ﻿@php
   // 是否启动安装
-  $isInstall = $request->method() === 'POST' && isset($ftp_connect_error_message) && $ftp_connect_error_message === true && isset($db_connect_error_message) && $db_connect_error_message === true;
+  $isInstall = $request->method() === 'POST' && isset($ftp_connect_status) && $ftp_connect_status === true && isset($db_connect_status) && $db_connect_status === true;
 @endphp
 <!DOCTYPE html>
 <html lang="zxx">
@@ -90,7 +90,8 @@
           appendProgressInfo('连接 FTP.');
       };
       $software->on_ftp_connect = function ($status, $ftp_config, $software) {
-          if ($status === 1) {
+          var_dump([__FUNCTION__, $status, $ftp_config]);
+          if ($status === true) {
               appendProgressInfo('连接 FTP.', 'success', true);
               if ($software->has('db')) {
                   appendProgressInfo('连接 Database.');
@@ -101,16 +102,18 @@
               appendProgressInfo('连接 FTP.', 'danger', true);
           } else {
           }
+          updateProgress(10);
       };
       $software->on_db_connect = function ($status, $db_config, $software) {
           var_dump([__FUNCTION__, $status, $db_config]);
-          if ($status === 1) {
+          if ($status === true) {
               appendProgressInfo('连接 Database.', 'success', true);
               appendProgressInfo('检测本地应用包.');
           } elseif ($status === 0) {
               appendProgressInfo('连接 Database.', 'danger', true);
           } else {
           }
+          updateProgress(20);
       };
       $software->on_local_package = function ($path, $package, $software) {
           if (empty($path)) {
@@ -120,6 +123,7 @@
               appendProgressInfo('检测到本地应用包. ' . basename($path), 'success', true);
               appendProgressInfo('解压缩当前应用包.');
           }
+          updateProgress(30);
       };
       $software->on_unzip_package = function ($path, $package, $software) {
           if (empty($path)) {
@@ -129,6 +133,7 @@
               appendProgressInfo('生成配置文件.');
               appendProgressInfo('上传至 FTP 服务器.');
           }
+          updateProgress(40);
       };
       $software->on_ftp_upload = function ($status, $ftp_config, $software) {
           if (empty($status)) {
@@ -136,6 +141,7 @@
           } else {
               appendProgressInfo('上传至 FTP 服务器.', 'danger', true);
           }
+          updateProgress(50);
       };
       $software->install();
   }

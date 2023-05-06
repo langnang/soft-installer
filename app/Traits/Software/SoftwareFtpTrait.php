@@ -5,6 +5,7 @@ namespace App\Traits\Software;
 trait SoftwareFtpTrait
 {
     private $ftp;
+    private $ftp_slug;
     private $ftp_config = [
         "host" => null,
         "port" => 21,
@@ -22,7 +23,7 @@ trait SoftwareFtpTrait
     {
         // var_dump(__METHOD__);
         // $this->ftp = new \FtpClient\FtpClient();
-        // $this->ftp_config = isset($config['ftp_config']) ? $config['ftp_config'] : $this->ftp_config;
+        $this->ftp_config = isset($config['ftp_config']) ? $config['ftp_config'] : $this->ftp_config;
     }
     public function setFtpConfig($config)
     {
@@ -52,21 +53,23 @@ trait SoftwareFtpTrait
     }
 
     // 连接 FTP
-    public function ftp_connect()
+    public function ftp_connect($slug)
     {
-        // var_dump(__METHOD__);
-        // var_dump($this->ftp_config);
-        if (!$this->canFtpConnect()) {
-            $this->ftp_connect_status = false;
-        } else {
-            try {
-                app('ftp')->connect($this->ftp_config['host'], false, $this->ftp_config['port']);
-                app('ftp')->login($this->ftp_config['username'], $this->ftp_config['password']);
-                $this->ftp_connect_status = true;
-                // $this->token = md5(json_encode($request->all()));
-            } catch (\Exception $e) {
-                var_dump($e);
-                $this->ftp_connect_status = $e->getCode();
+        // 标识不一致 或 状态码非TRUE
+        if ($this->ftp_slug !== $slug || $this->ftp_connect_status !== true) {
+            $this->ftp_slug = $slug;
+            // var_dump(__METHOD__);
+            if (!$this->canFtpConnect()) {
+                $this->ftp_connect_status = false;
+            } else {
+                try {
+                    $this->ftp = app('ftp');
+                    $this->ftp->connect($this->ftp_config['host'], false, $this->ftp_config['port']);
+                    $this->ftp->login($this->ftp_config['username'], $this->ftp_config['password']);
+                    $this->ftp_connect_status = true;
+                } catch (\Exception $e) {
+                    $this->ftp_connect_status = $e->getCode();
+                }
             }
         }
         if ($this->on_ftp_connect) {
