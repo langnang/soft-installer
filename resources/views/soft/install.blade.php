@@ -90,7 +90,6 @@
           appendProgressInfo('连接 FTP.');
       };
       $software->on_ftp_connect = function ($status, $ftp_config, $software) {
-          var_dump([__FUNCTION__, $status, $ftp_config]);
           if ($status === true) {
               appendProgressInfo('连接 FTP.', 'success', true);
               if ($software->has('db')) {
@@ -105,7 +104,6 @@
           updateProgress(10);
       };
       $software->on_db_connect = function ($status, $db_config, $software) {
-          var_dump([__FUNCTION__, $status, $db_config]);
           if ($status === true) {
               appendProgressInfo('连接 Database.', 'success', true);
               appendProgressInfo('检测本地应用包.');
@@ -145,5 +143,5 @@
       };
       $software->install();
   }
-
+  
 @endphp

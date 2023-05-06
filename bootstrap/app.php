@@ -92,7 +92,7 @@ $app->configure('app');
 */
 
 $app->register(ZanySoft\Zip\ZipServiceProvider::class);
-$app->register(GrahamCampbell\GitHub\GitHubServiceProvider::class);
+// $app->register(GrahamCampbell\GitHub\GitHubServiceProvider::class);
 $app->register(App\Providers\FtpServiceProvider::class);
 $app->register(App\Providers\SoftwareServiceProvider::class);
 // $app->register(App\Providers\AppServiceProvider::class);

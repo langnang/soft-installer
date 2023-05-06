@@ -79,15 +79,21 @@ trait SoftwareDbTrait
                 $this->db_connect_status = false;
             } else {
                 try {
+
+                    $this->db = app('db');
+                    $this->db->setApplication(app());
                     app('config')->set('database.connections.' . $slug, [
                         'driver' => $this->db_config['driver'],
                         'host' => $this->db_config['host'],
-                        'database' => $this->db_config['port'],
+                        'port' => $this->db_config['port'],
+                        'database' => $this->db_config['database'],
                         'username' => $this->db_config['username'],
                         'password' => $this->db_config['password'],
-                        'prefix' => $this->db_config['prefix']
+                        'charset'  => 'utf8',
+                        'collation' => 'utf8_unicode_ci',
+                        'prefix' => $this->db_config['prefix'],
                     ]);
-                    $this->db = \Illuminate\Support\Facades\DB::connection($slug);
+                    $this->db = $this->db->connection($slug);
                     $this->db->select('show databases');
                     $this->Schema = \Illuminate\Support\Facades\Schema::connection($slug);
                     $this->db_connect_status = true;
