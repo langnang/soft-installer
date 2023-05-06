@@ -43,6 +43,7 @@ trait SoftwareDbTrait
     public function software_db_construct($config = [])
     {
         $this->db_config = isset($config['db_config']) ? $config['db_config'] : $this->db_config;
+        $this->tables = isset($config['tables']) ? $config['tables'] : $this->tables;
     }
     public function setDbConfig($config)
     {
@@ -108,15 +109,97 @@ trait SoftwareDbTrait
         return $this->db_connect_status;
     }
 
+
+    public function table_exists($table)
+    {
+        $status = $this->Schema->hasTable($table);
+        if ($this->on_table_exists) {
+            $return = call_user_func($this->on_table_exists, $status, $table, $this->tables, $this);
+            unset($return);
+        }
+        return $status;
+    }
     // 数据库迁移
-    public function table_create()
+    public function table_create($table)
     {
+        $create_sql = isset($this->tables[$table]['create']) ? $this->tables[$table]['create'] : null;
+        $columns = $this->tables[$table]['columns'];
+        $status = false;
+        try {
+            if (!empty($create_sql)) {
+                $create_sql = str_replace(['{{table}}'], [$this->db_config['prefix'] . $table], $create_sql);
+                $this->db->statement($create_sql);
+            } else {
+                // $this->Schema->create($table, function (\Illuminate\Database\Schema\Blueprint $table) use ($columns) {
+                //     // 主键
+                //     $primaries = [];
+                //     // 唯一索引
+                //     $uniques = [];
+                //     // 普通索引
+                //     $indexes = [];
+                //     foreach ($columns as $column) {
+                //         if (empty($column['name'])) continue;
+                //         // if (!empty($column['primary'])) array_push($primaries, $column['name']);
+                //         // if (!empty($column['unique'])) array_push($uniques, $column['name']);
+                //         // if (!empty($column['index'])) array_push($indexes, $column['name']);
+                //         $col = null;
+                //         $type = isset($column['type']) ? $column['type'] : "string";
+                //         $length = isset($column['length']) ? $column['length'] : null;
+
+                //         $col = $table->{$type}($column['name'], $length, null);
+
+                //         if (!isset($column['nullable']) || $column['nullable']) $col = $col->nullable();
+
+                //         foreach (['unsigned', 'primary', 'unique', 'index'] as $fn) {
+                //             if (isset($column[$fn]) && $column[$fn]) $col = $col->{$fn}();
+                //         }
+                //         // if (isset($column['nullable']) && $column['nullable']) $col = $col->nullable();
+                //         // if (isset($column['unsigned']) && $column['unsigned']) $col = $col->unsigned();
+
+                //         // if (isset($column['primary']) && $column['primary']) $col = $col->primary();
+                //         // if (isset($column['unique']) && $column['unique']) $col = $col->unique();
+                //         // if (isset($column['index']) && $column['index']) $col = $col->index();
+                //         // if ($primary) $table->primary($column['name']);
+                //     }
+                //     // $table->primary(['cid', 'name']);
+                //     // foreach ($columns as $name => $funcs) {
+                //     //     var_dump([$name, $funcs, array_slice($funcs[0], 1)]);
+                //     //     $col = $table->{$funcs[0][0]}($name, ...array_slice($funcs[0], 1));
+                //     //     foreach (array_slice($funcs, 1) as $fn) {
+                //     //         var_dump($fn);
+                //     //         $fn = array($fn);
+                //     //         $col = $col->{$fn[0]}(...array_slice($fn, 1));
+                //     //     }
+                //     // }
+                //     // $table->primary("cid");
+                //     // $table->primary("name");
+                //     var_dump([$primaries, $uniques, $indexes]);
+                // });
+            }
+            $status = true;
+        } catch (\Exception $e) {
+            $status = $e->getCode();
+        }
+        if ($this->on_table_create) {
+            $return = call_user_func($this->on_table_create, $status, $table, $this->tables, $this);
+            unset($return);
+        }
+        return $status;
     }
-    public function table_exists()
+    public function table_drop($table)
     {
-    }
-    public function table_drop()
-    {
+        $status = null;
+        try {
+            $this->Schema->dropIfExists($table);
+            $status = true;
+        } catch (\Exception $e) {
+            $status = $e->getCode();
+        }
+        if ($this->on_table_drop) {
+            $return = call_user_func($this->on_table_drop, $status, $table, $this->tables, $this);
+            unset($return);
+        }
+        return $status;
     }
     public function migration_up()
     {
@@ -132,7 +215,22 @@ trait SoftwareDbTrait
     public function factory_unverified($table)
     {
     }
-    public function seeder_run()
+    public function seeder_run($table)
     {
+        $status = null;
+        try {
+            $records = isset($this->tables[$table]['records']) ? $this->tables[$table]['records'] : [];
+            foreach ($records as $record) {
+                $this->db->table($table)->insert($record);
+            }
+            $status = true;
+        } catch (\Exception $e) {
+            $status = $e->getCode();
+        }
+        if ($this->on_table_seeder) {
+            $return = call_user_func($this->on_table_seeder, $status, $table, $this->tables, $this);
+            unset($return);
+        }
+        return $status;
     }
 }

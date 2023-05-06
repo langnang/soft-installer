@@ -379,6 +379,7 @@
                 ]
             },
             "users": {
+                "create": "CREATE TABLE `{{table}}`  (\r\n  `uid` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,\r\n  `name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,\r\n  `password` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,\r\n  `mail` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,\r\n  `url` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,\r\n  `screenName` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,\r\n  `created` int(10) UNSIGNED NULL DEFAULT 0,\r\n  `activated` int(10) UNSIGNED NULL DEFAULT 0,\r\n  `logged` int(10) UNSIGNED NULL DEFAULT 0,\r\n  `group` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'visitor',\r\n  `authCode` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,\r\n  PRIMARY KEY (`uid`) USING BTREE,\r\n  UNIQUE INDEX `name`(`name`) USING BTREE,\r\n  UNIQUE INDEX `mail`(`mail`) USING BTREE\r\n) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;",
                 "columns": [
                     [
                         "uid",
@@ -473,7 +474,95 @@
                         "authCode": ""
                     }
                 ]
-            }
+            },
+            "metas": {},
+            "contents": {},
+            "relationships": {},
+            "fields": {
+                "create": "CREATE TABLE `{{table}}`  (\r\n  `cid` int(10) UNSIGNED NOT NULL,\r\n  `name` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,\r\n  `type` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'str',\r\n  `str_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,\r\n  `int_value` int(10) NULL DEFAULT 0,\r\n  `float_value` float NULL DEFAULT 0,\r\n  PRIMARY KEY (`cid`, `name`) USING BTREE,\r\n  INDEX `int_value`(`int_value`) USING BTREE,\r\n  INDEX `float_value`(`float_value`) USING BTREE\r\n) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;",
+                "columns": [
+                    {
+                        "name": "cid",
+                        "type": "unsignedInteger",
+                        "length": 10,
+                        "nullable": false,
+                        "unsigned": true
+                    },
+                    {
+                        "name": "name",
+                        "primary": true,
+                        "type": "string",
+                        "length": 150,
+                        "nullable": false
+                    },
+                    {
+                        "name": "type",
+                        "type": "string",
+                        "length": 8
+                    },
+                    {
+                        "name": "str_value",
+                        "type": "text"
+                    },
+                    {
+                        "name": "int_value",
+                        "type": "integer",
+                        "index": true
+                    },
+                    {
+                        "name": "float_value",
+                        "type": "float",
+                        "index": true
+                    }
+                ],
+                "_columns": {
+                    "cid": [
+                        [
+                            "integer",
+                            10
+                        ],
+                        "autoIncrement"
+                    ],
+                    "name": [
+                        [
+                            "string",
+                            150
+                        ],
+                        "nullable"
+                    ],
+                    "type": [
+                        [
+                            "string",
+                            8
+                        ],
+                        "nullable"
+                    ],
+                    "str_value": [
+                        [
+                            "text"
+                        ],
+                        "nullable"
+                    ],
+                    "int_value": [
+                        [
+                            "integer",
+                            10
+                        ],
+                        "nullable"
+                    ],
+                    "float_value": [
+                        [
+                            "float"
+                        ],
+                        "nullable"
+                    ]
+                },
+                "primary": [
+                    "cid",
+                    "name"
+                ]
+            },
+            "comments": {}
         },
         "templates": [],
         "themes": [],

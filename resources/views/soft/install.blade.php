@@ -86,6 +86,7 @@
       echo '<script>
         localStorage.setItem("SoftInstaller", JSON.stringify('.json_encode($request->all()).'))
       </script>';
+      $hasOldTable = false;
       $software->on_start = function ($software) {
           appendProgressInfo('连接 FTP.');
       };
@@ -129,9 +130,17 @@
           } else {
               appendProgressInfo('解压缩当前应用包.', 'success', true);
               appendProgressInfo('生成配置文件.');
-              appendProgressInfo('上传至 FTP 服务器.');
           }
           updateProgress(40);
+      };
+      $software->on_generate_config_file = function ($content, $path, $package, $software) {
+          if (!empty($content)) {
+              appendProgressInfo('生成配置文件.', 'success', true);
+              appendProgressInfo('上传至 FTP 服务器.');
+          } else {
+              appendProgressInfo('生成配置文件.', 'danger', true);
+          }
+          updateProgress(45);
       };
       $software->on_ftp_upload = function ($status, $ftp_config, $software) {
           if (empty($status)) {
@@ -141,7 +150,31 @@
           }
           updateProgress(50);
       };
+      $software->on_table_exists = function ($status, $table, $tables, $software) use (&$hasOldTable) {
+          if ($status === true) {
+              appendProgressInfo('检测到表[ ' . $software->getDbConfig('prefix') . $table . ' ].', 'danger');
+              $hasOldTable = true;
+          } else {
+              appendProgressInfo('未检测到表[ ' . $software->getDbConfig('prefix') . $table . ' ].', 'success');
+              appendProgressInfo('迁移数据表[ ' . $software->getDbConfig('prefix') . $table . ' ].');
+          }
+      };
+      $software->on_table_create = function ($status, $table, $tables, $software) {
+          if ($status === true) {
+              appendProgressInfo('迁移数据表[ ' . $software->getDbConfig('prefix') . $table . ' ].', 'success');
+              appendProgressInfo('填充数据表[ ' . $software->getDbConfig('prefix') . $table . ' ].');
+          } else {
+              appendProgressInfo('迁移数据表[ ' . $software->getDbConfig('prefix') . $table . ' ].', 'danger');
+          }
+      };
+      $software->on_table_seeder = function ($status, $table, $tables, $software) {
+          if ($status === true) {
+              appendProgressInfo('填充数据表[ ' . $software->getDbConfig('prefix') . $table . ' ].', 'success');
+          } else {
+          }
+      };
       $software->install();
+      var_dump($hasOldTable);
   }
   
 @endphp

@@ -80,6 +80,8 @@ class SoftwareController extends Controller
                 return !empty($this->packages);
             case 'db':
                 return !empty($this->package['database']) || !empty($this->config['database']);
+            case 'files':
+                break;
             default:
                 break;
         }
@@ -90,20 +92,36 @@ class SoftwareController extends Controller
         $files = array_merge($this->config['files'], $this->package['files']);
 
         foreach ($files as $file) {
-            $path = 'scripts/' . $this->package['local_dir'] . '/' . $file['path'];
+            $path = $this->package['local_dir'] . '/' . $file['path'];
             $content = str_replace([
                 '{{ftp.host}}',
                 '{{ftp.port}}',
                 '{{ftp.username}}',
                 '{{ftp.password}}',
+                '{{ftp.path}}',
+                '{{db.driver}}',
+                '{{db.host}}',
+                '{{db.port}}',
+                '{{db.username}}',
+                '{{db.password}}',
+                '{{db.database}}',
+                '{{db.prefix}}',
             ], [
                 $this->ftp_config['host'],
                 $this->ftp_config['port'],
                 $this->ftp_config['username'],
                 $this->ftp_config['password'],
+                $this->ftp_config['path'],
+                $this->db_config['driver'],
+                $this->db_config['host'],
+                $this->db_config['port'],
+                $this->db_config['username'],
+                $this->db_config['password'],
+                $this->db_config['database'],
+                $this->db_config['prefix'],
             ], $file['content']);
             if ($this->on_generate_config_file) {
-                $result = call_user_func($this->on_generate_config_file, $path, $content, ['ftp' => $this->package['ftp_config']], $this);
+                $result = call_user_func($this->on_generate_config_file, $content, $path, $this->package, $this);
                 if (!empty($result)) {
                     $content = $result;
                 }
@@ -139,8 +157,17 @@ class SoftwareController extends Controller
         }
         // 解压应用包
         $directory_package = $this->unzip_package($this->getSlug(), $this->token, $local_package);
-        // $this->generate_config_files();
 
-        $this->ftp_upload($directory_package, $this->package['directory']);
+        $this->generate_config_files();
+
+        // $this->ftp_upload($directory_package, $this->package['directory']);
+        foreach (array_keys($this->tables) as $table) {
+            $hasTable = $this->table_exists($table);
+            if ($hasTable) continue;
+
+            if ($this->table_create($table)) {
+                $this->seeder_run($table);
+            }
+        }
     }
 }
