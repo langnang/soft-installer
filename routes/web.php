@@ -42,15 +42,6 @@ $router->group(['prefix' => 'software'], function () use ($router) {
         var_dump($request->all());
         $software = app('software')->getSubClass($software);
         $package = $software->getPackage($request->version);
-        $software->setDbConfig([
-            'driver' => $request->input('db_driver', 'mysql'),
-            'host' => $request->input('db_host'),
-            'port' => $request->input('db_port', 3306),
-            'username' => $request->input('db_username'),
-            'password' => $request->input('db_password'),
-            'database' => $request->input('db_database'),
-            'prefix' => $request->input('db_table_prefix'),
-        ]);
         $software->setFtpConfig([
             'host' => $request->input('ftp_host'),
             'port' => $request->input('ftp_port', 21),
@@ -59,15 +50,33 @@ $router->group(['prefix' => 'software'], function () use ($router) {
             'path' => $request->input('ftp_dir_path'),
         ]);
         // 连接FTP
-        // $ftp_connect_error_message = $software->ftp_connect($request);
-        // 连接MySQL
-        // $db_connect_error_message = $software->db_connect($request);
+        $ftp_connect_error_message = $software->ftp_connect();
+        $db_connect_error_message = null;
+        if ($software->has('db')) {
+            $software->setDbConfig([
+                'driver' => $request->input('db_driver', 'mysql'),
+                'host' => $request->input('db_host'),
+                'port' => $request->input('db_port', 3306),
+                'username' => $request->input('db_username'),
+                'password' => $request->input('db_password'),
+                'database' => $request->input('db_database'),
+                'prefix' => $request->input('db_table_prefix'),
+            ]);
+            // 连接MySQL
+            $db_connect_error_message = $software->db_connect($software->getSlug());
+        }
+
+
+
+        var_dump([$ftp_connect_error_message, $db_connect_error_message,]);
         $view = 'soft.install';
         if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [
             'request' => $request,
             'software' => $software,
             'package' => $package,
+            'ftp_connect_error_message' => $ftp_connect_error_message,
+            'db_connect_error_message' => $db_connect_error_message,
         ]);
     });
 });

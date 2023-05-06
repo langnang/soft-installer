@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@php
+  // 是否启动安装
+  $isInstall = $request->method() === 'POST' && isset($ftp_connect_error_message) && $ftp_connect_error_message === true && isset($db_connect_error_message) && $db_connect_error_message === true;
+@endphp
+<!DOCTYPE html>
 <html lang="zxx">
 
 @include('home.shared.head')
@@ -11,67 +15,64 @@
       <form action="" method="post">
 
         @include('soft.shared.jumbotron')
-        <section name="progress">
-          {{-- @if (isset($ftp_connect_error_message) && $ftp_connect_error_message === true && isset($db_connect_error_message) && $db_connect_error_message === true)
-          @include('soft.shared.progress')
-          @include('shared.result')
-        @else --}}
-          @if ($request->method() === 'POST')
+        @if ($isInstall)
+          <section name="progress">
             @include('soft.shared.progress')
             @include('shared.result')
-          @endif
-        </section>
+          </section>
+        @endif
 
-        <section name="install">
+        @if (!$isInstall)
+          <section name="install">
 
           @empty($software->statement)
           @else
             @include('soft.shared.statement')
           @endempty
 
-          @empty($software->packages)
-          @else
-            @include('soft.shared.version')
-          @endempty
+        @empty($software->packages)
+        @else
+          @include('soft.shared.version')
+        @endempty
 
-          @empty($package)
-          @else
-            @include('soft.shared.environment', ['envs' => $package['env']])
+      @empty($package)
+      @else
+        @include('soft.shared.environment', ['envs' => $package['env']])
 
-            @include('soft.shared.ftp')
+        @include('soft.shared.ftp')
 
-            @if ($software->has('db'))
-              @include('soft.shared.database')
-            @endif
+        @if ($software->has('db'))
+          @include('soft.shared.database')
+        @endif
 
-            {{-- @include('soft.shared.administrator') --}}
-            <div class="section" name="submit">
-              <div class="container text-center">
-                <button class="button" type="submit">Submit</button>
-              </div>
-            </div>
-          @endempty
+        {{-- @include('soft.shared.administrator') --}}
+        <div class="section" name="submit">
+          <div class="container text-center">
+            <button class="button" type="submit">Submit</button>
+          </div>
+        </div>
+      @endempty
 
-        </section>
-        {{-- @endif --}}
-
-      </form>
-    @show
-  </main>
-
-  @include('home.shared.footer')
-  @include('home.shared.script')
-  @if ($request->method() === 'GET')
-    <script>
-      const storage = JSON.parse(localStorage.getItem('SoftInstaller'));
-      if (localStorage.getItem('SoftInstaller') && storage) {
-        for (key in storage) {
-          if (['ftp_dir_path', 'db_table_prefix'].includes(key)) continue;
-          $(`[name="${key}"]`).val(storage[key])
-        }
-      }
-    </script>
+    </section>
   @endif
+
+</form>
+@show
+</main>
+
+@include('home.shared.footer')
+@include('home.shared.script')
+@if ($request->method() === 'GET')
+<script>
+  const storage = JSON.parse(localStorage.getItem('SoftInstaller'));
+  if (localStorage.getItem('SoftInstaller') && storage) {
+    for (key in storage) {
+      if (['ftp_dir_path', 'db_table_prefix'].includes(key)) continue;
+      $(`[name="${key}"]`).val(storage[key])
+    }
+  }
+</script>
+@endif
 </body>
 
 </html>
@@ -81,7 +82,7 @@
   ignore_user_abort(true); //设置断开连接继续执行
   header('X-Accel-Buffering: no'); //关闭buffer
   ob_start(); //打开输出缓冲控制
-  if ($request->method() === 'POST') {
+  if ($isInstall) {
       echo '<script>
         localStorage.setItem("SoftInstaller", JSON.stringify('.json_encode($request->all()).'))
       </script>';
@@ -91,9 +92,23 @@
       $software->on_ftp_connect = function ($status, $ftp_config, $software) {
           if ($status === 1) {
               appendProgressInfo('连接 FTP.', 'success', true);
-              appendProgressInfo('检测本地应用包.');
+              if ($software->has('db')) {
+                  appendProgressInfo('连接 Database.');
+              } else {
+                  appendProgressInfo('检测本地应用包.');
+              }
           } elseif ($status === 0) {
               appendProgressInfo('连接 FTP.', 'danger', true);
+          } else {
+          }
+      };
+      $software->on_db_connect = function ($status, $db_config, $software) {
+          var_dump([__FUNCTION__, $status, $db_config]);
+          if ($status === 1) {
+              appendProgressInfo('连接 Database.', 'success', true);
+              appendProgressInfo('检测本地应用包.');
+          } elseif ($status === 0) {
+              appendProgressInfo('连接 Database.', 'danger', true);
           } else {
           }
       };
@@ -124,5 +139,5 @@
       };
       $software->install();
   }
-  
+
 @endphp

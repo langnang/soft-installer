@@ -69,28 +69,32 @@ trait SoftwareDbTrait
     public function canDbConnect()
     {
         // var_dump(__METHOD__);
+        if (empty($this->db_config['driver']) || empty($this->db_config['host']) || empty($this->db_config['port']) || empty($this->db_config['username']) || empty($this->db_config['password']) || empty($this->db_config['database'])) {
+            return false;
+        }
+        return true;
     }
     // 连接 MySQL
-    public function db_connect(\Illuminate\Http\Request $request = null)
+    public function db_connect($slug)
     {
         // var_dump(__METHOD__);
-        $request = empty($request) ? $this->request : $request;
-        if (empty($request)) return false;
-        if (!empty($request->db_host) && !empty($request->db_username) && !empty($request->db_password) && !empty($request->db_database) && !empty($request->db_port)) {
+        if (!$this->canDbConnect()) {
+            $this->db_connect_status = 0;
+        } else {
             try {
-                app('config')->set('database.connections.' . $this->getSlug(), [
-                    'driver' => $request->db_driver,
-                    'host' => $request->db_host,
-                    'database' => $request->db_database,
-                    'username' => $request->db_username,
-                    'password' => $request->db_password,
-                    'prefix' => $request->db_table_prefix
+                app('config')->set('database.connections.' . $slug, [
+                    'driver' => $this->db_config['driver'],
+                    'host' => $this->db_config['host'],
+                    'database' => $this->db_config['port'],
+                    'username' => $this->db_config['username'],
+                    'password' => $this->db_config['password'],
+                    'prefix' => $this->db_config['prefix']
                 ]);
-                $this->connection = \Illuminate\Support\Facades\DB::connection($this->getSlug());
+                $this->connection = \Illuminate\Support\Facades\DB::connection($slug);
 
                 $this->connection->select('show databases');
 
-                $this->Schema = \Illuminate\Support\Facades\Schema::connection($this->getSlug());
+                $this->Schema = \Illuminate\Support\Facades\Schema::connection($slug);
             } catch (\Exception $e) {
                 $this->db_connect_status = $e->getCode();
             }

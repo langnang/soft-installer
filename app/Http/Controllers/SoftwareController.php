@@ -127,9 +127,13 @@ class SoftwareController extends Controller
             $return = call_user_func($this->on_start, $this);
             unset($return);
         }
-        // if (!$this->db_connect()) return;
         // 链接 FTP
         if (!$this->ftp_connect()) return;
+
+        if ($this->has('db')) {
+            if (!$this->db_connect($this->getSlug())) return;
+        }
+
 
         $this->setToken();
 

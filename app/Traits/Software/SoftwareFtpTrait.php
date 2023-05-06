@@ -45,22 +45,27 @@ trait SoftwareFtpTrait
     public function canFtpConnect()
     {
         // var_dump(__METHOD__);
+        if (empty($this->ftp_config['host']) || empty($this->ftp_config['port']) || empty($this->ftp_config['username']) || empty($this->ftp_config['password'])) {
+            return false;
+        }
+        return true;
     }
 
     // 连接 FTP
     public function ftp_connect()
     {
         // var_dump(__METHOD__);
-        var_dump($this->ftp_config);
-        if (empty($this->ftp_config['host']) || empty($this->ftp_config['port']) || empty($this->ftp_config['username']) || empty($this->ftp_config['password'])) {
-            $this->ftp_connect_status = 0;
+        // var_dump($this->ftp_config);
+        if (!$this->canFtpConnect()) {
+            $this->ftp_connect_status = false;
         } else {
             try {
                 app('ftp')->connect($this->ftp_config['host'], false, $this->ftp_config['port']);
                 app('ftp')->login($this->ftp_config['username'], $this->ftp_config['password']);
-                $this->ftp_connect_status = 1;
+                $this->ftp_connect_status = true;
                 // $this->token = md5(json_encode($request->all()));
             } catch (\Exception $e) {
+                var_dump($e);
                 $this->ftp_connect_status = $e->getCode();
             }
         }
