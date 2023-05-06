@@ -29,7 +29,6 @@ $router->group(['prefix' => 'software'], function () use ($router) {
         $software = app('software')->getSubClass($software);
         $package = $software->getPackage($request->version);
         $view = 'soft.install';
-        // var_dump($software);
         // 自定义视图
         if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [
@@ -39,7 +38,6 @@ $router->group(['prefix' => 'software'], function () use ($router) {
         ]);
     });
     $router->post('/{software}', function ($software, Request $request) use ($router) {
-        var_dump($request->all());
         $software = app('software')->getSubClass($software);
         $package = $software->getPackage($request->version);
         $software->setFtpConfig([
@@ -68,7 +66,6 @@ $router->group(['prefix' => 'software'], function () use ($router) {
 
 
 
-        var_dump([$ftp_connect_status, $db_connect_status,]);
         $view = 'soft.install';
         if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [

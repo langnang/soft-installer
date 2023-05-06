@@ -42,12 +42,10 @@ trait SoftwareDbTrait
 
     public function software_db_construct($config = [])
     {
-        // var_dump(__METHOD__);
         $this->db_config = isset($config['db_config']) ? $config['db_config'] : $this->db_config;
     }
     public function setDbConfig($config)
     {
-        // var_dump(__METHOD__);
         $this->db_config['driver'] = isset($config['driver']) ? $config['driver'] : $this->db_config['driver'];
         $this->db_config['host'] = isset($config['host']) ? $config['host'] : $this->db_config['host'];
         $this->db_config['port'] = isset($config['port']) ? $config['port'] : $this->db_config['port'];
@@ -58,7 +56,6 @@ trait SoftwareDbTrait
     }
     public function getDbConfig($key = null)
     {
-        // var_dump(__METHOD__);
         if (empty($key)) return $this->db_config;
         return $this->db_config[$key];
     }
@@ -67,7 +64,6 @@ trait SoftwareDbTrait
      */
     public function canDbConnect()
     {
-        // var_dump(__METHOD__);
         if (empty($this->db_config['driver']) || empty($this->db_config['host']) || empty($this->db_config['port']) || empty($this->db_config['username']) || empty($this->db_config['password']) || empty($this->db_config['database'])) {
             return false;
         }
@@ -79,7 +75,6 @@ trait SoftwareDbTrait
         // 标识不一致 或 状态码非TRUE
         if ($this->db_slug !== $slug || $this->db_connect_status !== true) {
             $this->db_slug = $slug;
-            // var_dump(__METHOD__);
             if (!$this->canDbConnect()) {
                 $this->db_connect_status = false;
             } else {

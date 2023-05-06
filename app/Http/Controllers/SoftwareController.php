@@ -47,7 +47,6 @@ class SoftwareController extends Controller
      */
     public function __construct($config = [], $mini = false)
     {
-        // var_dump(__METHOD__);
         // 绑定到 Application
         if ($config instanceof \Laravel\Lumen\Application) {
             $this->app = $config;
@@ -69,7 +68,6 @@ class SoftwareController extends Controller
     }
     public function setToken()
     {
-        // var_dump(__METHOD__);
         $this->token = md5(json_encode([
             "ftp_config" => $this->ftp_config,
             "db_config" => $this->db_config,
@@ -89,7 +87,6 @@ class SoftwareController extends Controller
     // 创建配置文件
     public function generate_config_files()
     {
-        // var_dump(__METHOD__);
         $files = array_merge($this->config['files'], $this->package['files']);
 
         foreach ($files as $file) {
@@ -114,11 +111,9 @@ class SoftwareController extends Controller
             }
             app('files')->put($path, $content);
         }
-        // var_dump($files);
     }
     public function install()
     {
-        // var_dump(__METHOD__);
         // set_time_limit(0); //设置程序执行时间
         // ignore_user_abort(true); //设置断开连接继续执行
         // header('X-Accel-Buffering: no'); //关闭buffer
@@ -144,7 +139,6 @@ class SoftwareController extends Controller
         }
         // 解压应用包
         $directory_package = $this->unzip_package($this->getSlug(), $this->token, $local_package);
-        var_dump($directory_package);
         // $this->generate_config_files();
 
         $this->ftp_upload($directory_package, $this->package['directory']);

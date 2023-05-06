@@ -51,7 +51,6 @@ trait SoftwareTrait
     // 获取继承的子类
     public function getSubClass($slug = null)
     {
-        // var_dump(__METHOD__);
         $classes = [];
         if (app('files')->exists(env('SOFTWARE_LOCAL_FILE'))) {
             $classes = array_merge($classes, json_decode(app('files')->get(env('SOFTWARE_LOCAL_FILE')), true));
@@ -60,7 +59,6 @@ trait SoftwareTrait
         foreach ($classes as  $class) {
             // 跳过没有名称(name)的
             if (!isset($class['name']) || empty($class['name'])) continue;
-            // var_dump($class['name']);
             $class = new $this($class, empty($slug));
             if (!empty($slug) && $class->getSlug() === $slug) return $class;
             $result[$class->getSlug()] = $class;
@@ -70,7 +68,6 @@ trait SoftwareTrait
 
     public function getCategorySubClass()
     {
-        // var_dump(__METHOD__);
         $classes = $this->getSubClass();
         $result = [];
         foreach ($classes as $class) {

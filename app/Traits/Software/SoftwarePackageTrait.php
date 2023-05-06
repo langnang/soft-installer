@@ -16,12 +16,10 @@ trait SoftwarePackageTrait
 
     public function software_package_construct($config = [])
     {
-        // var_dump(__METHOD__);
         $this->packages = isset($config['packages']) ? $config['packages'] : $this->packages;
     }
     public function getPackage($version = null)
     {
-        var_dump([__METHOD__, $version]);
         if (sizeof($this->packages) === 0) return;
         if (empty($version)) {
             $this->package = $this->packages[0];
@@ -33,7 +31,6 @@ trait SoftwarePackageTrait
                 }
             }
         }
-        var_dump([__METHOD__, $this->package]);
         return $this->package;
     }
 
@@ -42,7 +39,6 @@ trait SoftwarePackageTrait
      */
     public function get_local_package($slug, $callback = null)
     {
-        var_dump([__METHOD__, $slug]);
         foreach ($this->package['urls'] as $url) {
             $extension = $this->get_zip_extension($url);
             $file = $slug . '-' . $this->package['version'] . '.' . $extension;
@@ -61,7 +57,6 @@ trait SoftwarePackageTrait
     // 下载应用包
     public function download_package($slug, $callback = null)
     {
-        var_dump(__METHOD__);
         foreach ($this->package['urls'] as $url) {
             $extension = $this->get_zip_extension($url);
             $path = $this->getSlug() . '/' . $this->getSlug() . '-' . $this->package['version'] . '.' . $extension;
@@ -82,7 +77,6 @@ trait SoftwarePackageTrait
     // 解压缩应用包
     public function unzip_package($slug, $token, $package = null, $path = null)
     {
-        var_dump([__METHOD__, $slug, $token]);
         $extension = $this->get_zip_extension($this->package['local_file']);
         $this->package['local_dir'] = env('SOFTWARE_ROOT') . '/' . $slug . '/' . $slug . '-' . $this->package['version'] . "." . $token;
         $file_path = __DIR__ . '/../../../' . $this->package['local_file'];
@@ -107,7 +101,6 @@ trait SoftwarePackageTrait
     // 获取压缩包文件格式
     public static function get_zip_extension($path)
     {
-        // var_dump(__METHOD__);
         $types = ['7z', 'rar', 'zip', 'tar', 'tar.gz'];
         foreach ($types as $type) {
             if (substr($path, -strlen($type)) === $type) {

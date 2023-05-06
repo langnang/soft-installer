@@ -21,13 +21,11 @@ trait SoftwareFtpTrait
 
     public function software_ftp_construct($config = [])
     {
-        // var_dump(__METHOD__);
         // $this->ftp = new \FtpClient\FtpClient();
         $this->ftp_config = isset($config['ftp_config']) ? $config['ftp_config'] : $this->ftp_config;
     }
     public function setFtpConfig($config)
     {
-        // var_dump(__METHOD__);
         $this->ftp_config['host'] = isset($config['host']) ? $config['host'] : $this->ftp_config['host'];
         $this->ftp_config['port'] = isset($config['port']) ? $config['port'] : $this->ftp_config['port'];
         $this->ftp_config['username'] = isset($config['username']) ? $config['username'] : $this->ftp_config['username'];
@@ -36,7 +34,6 @@ trait SoftwareFtpTrait
     }
     public function getFtpConfig($key = null)
     {
-        // var_dump(__METHOD__);
         if (empty($key)) return $this->ftp_config;
         return $this->ftp_config[$key];
     }
@@ -45,7 +42,6 @@ trait SoftwareFtpTrait
      */
     public function canFtpConnect()
     {
-        // var_dump(__METHOD__);
         if (empty($this->ftp_config['host']) || empty($this->ftp_config['port']) || empty($this->ftp_config['username']) || empty($this->ftp_config['password'])) {
             return false;
         }
@@ -58,7 +54,6 @@ trait SoftwareFtpTrait
         // 标识不一致 或 状态码非TRUE
         if ($this->ftp_slug !== $slug || $this->ftp_connect_status !== true) {
             $this->ftp_slug = $slug;
-            // var_dump(__METHOD__);
             if (!$this->canFtpConnect()) {
                 $this->ftp_connect_status = false;
             } else {
@@ -86,7 +81,6 @@ trait SoftwareFtpTrait
      */
     public function ftp_upload($local_directory, $directory = "/")
     {
-        var_dump([__METHOD__, $local_directory, $directory]);
         $status = null;
         try {
             app('ftp')->putAll(__DIR__ . '/../../../' . $local_directory . $directory, $this->ftp_config['path']);
