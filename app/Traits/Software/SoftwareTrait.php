@@ -78,7 +78,6 @@ trait SoftwareTrait
             if (app('files')->exists($path)) {
                 $result = json_decode(app('files')->get($path), true);
             };
-
             if (empty($slug)) {
             } else {
                 $result = [$result];

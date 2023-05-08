@@ -21,7 +21,7 @@
                   @elseif (isset($software->logo['file']) && !empty($software->logo['file']))
                     <img src="/public/images/brands/{{ $software->logo['file'] }}" alt="">
                   @elseif (isset($software->logo['img']) && !empty($software->logo['img']))
-                    <img src="/public/images/brands/{{ $software->logo['img'] }}" alt="">
+                    <img src="{{ $software->logo['img'] }}" alt="">
                   @elseif (isset($software->logo['svg']) && !empty($software->logo['svg']))
                     <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="75"
                       height="75">
