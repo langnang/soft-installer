@@ -3,6 +3,7 @@
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 use App\Http\Controllers\SoftwareController;
+use App\Models\Software;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
@@ -27,6 +28,8 @@ $router->group(['prefix' => 'software'], function () use ($router) {
     });
     $router->get('/{software}', function ($software, Request $request) use ($router) {
         $software = app('software')->getSubClass($software);
+        // 远程配置文件不存在
+        if (!($software instanceof SoftwareController)) return redirect('software');
         $package = $software->getPackage($request->version);
         $view = 'soft.install';
         // 自定义视图
@@ -63,9 +66,6 @@ $router->group(['prefix' => 'software'], function () use ($router) {
             // 连接MySQL
             $db_connect_status = $software->db_connect($software->getSlug());
         }
-
-
-
         $view = 'soft.install';
         if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [

@@ -51,10 +51,7 @@ trait SoftwareTrait
     // 获取继承的子类
     public function getSubClass($slug = null)
     {
-        $classes = [];
-        if (app('files')->exists(env('SOFTWARE_LOCAL_FILE'))) {
-            $classes = array_merge($classes, json_decode(app('files')->get(env('SOFTWARE_LOCAL_FILE')), true));
-        };
+        $classes = array_merge($this->getLocalClass($slug), $this->getRemoteClass($slug));
         $result = [];
         foreach ($classes as  $class) {
             // 跳过没有名称(name)的
@@ -65,7 +62,63 @@ trait SoftwareTrait
         }
         return $result;
     }
+    /**
+     * 获取本地配置
+     */
+    public function getLocalClass($slug = null)
+    {
+        $summary = 'summary.json';
+        $result = [];
+        try {
+            if (empty($slug)) {
+                $path = env('SOFTWARE_LOCAL_PATH') . '/' . $summary;
+            } else {
+                $path = env('SOFTWARE_LOCAL_PATH') . '/' . $slug . '.json';
+            }
+            if (app('files')->exists($path)) {
+                $result = json_decode(app('files')->get($path), true);
+            };
 
+            if (empty($slug)) {
+            } else {
+                $result = [$result];
+            }
+        } catch (\Exception $e) {
+            $result = [];
+        }
+        return $result;
+    }
+    /**
+     * 获取远程配置
+     */
+    public function getRemoteClass($slug = null)
+    {
+        $summary = 'summary.json';
+        $result = [];
+        try {
+            $client = new \Github\Client();
+            $client->authenticate(env('GITHUB_TOKEN'), null, \Github\AuthMethod::JWT);
+            if (empty($slug)) {
+                $path = env('GITHUB_CONTENT_PATH') . '/' . $summary;
+            } else {
+                $path = env('GITHUB_CONTENT_PATH') . '/' . $slug . '.json';
+            }
+            $contents = $client->api('repo')->contents()->show(env('GITHUB_USER'), env('GITHUB_REPO'), $path, env('GITHUB_BRANCH'));
+            $result = json_decode(base64_decode($contents['content']), true);
+            if (empty($slug)) {
+                $result = array_map(function ($item) {
+                    $item['status'] = 'private';
+                    return $item;
+                }, $result);
+            } else {
+                $result['status'] = 'private';
+                $result = [$result];
+            }
+        } catch (\Exception $e) {
+            $result = [];
+        }
+        return $result;
+    }
     public function getCategorySubClass()
     {
         $classes = $this->getSubClass();
