@@ -22,6 +22,7 @@ trait SoftwarePackageTrait
     {
         $package['local_file'] = isset($package['local_file']) ? $package['local_file'] : null;
         $package['files'] = isset($package['files']) ? $package['files'] : [];
+        $package['database'] = isset($package['database']) ? $package['database'] : [];
         $this->package = $package;
     }
     public function getPackage($version = null)

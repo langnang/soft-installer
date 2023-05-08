@@ -69,6 +69,7 @@ class SoftwareController extends Controller
     public function setConfig($config)
     {
         $config['files'] = isset($config['files']) ? $config['files'] : [];
+        $config['database'] = isset($config['database']) ? $config['database'] : [];
         $this->config = $config;
     }
     public function setToken()
@@ -94,7 +95,7 @@ class SoftwareController extends Controller
     // 创建配置文件
     public function generate_config_files()
     {
-        $files = array_merge(isset($this->config['files']) ? $this->config['files'] : [], isset($this->package['files']) ? $this->package['files'] : []);
+        $files = array_merge($this->config['files'], $this->package['files']);
         var_dump($files);
         foreach ($files as $file) {
             $path = $this->package['local_dir'] . '/' . $file['path'];
