@@ -1,6 +1,7 @@
 ﻿@php
   // 是否启动安装
-  $isInstall = $request->method() === 'POST' && isset($ftp_connect_status) && $ftp_connect_status === true && isset($db_connect_status) && $db_connect_status === true;
+  $isInstall = $request->method() === 'POST' && (isset($ftp_connect_status) ? $ftp_connect_status === true : true) && (isset($db_connect_status) ? $db_connect_status === true : true);
+
 @endphp
 <!DOCTYPE html>
 <html lang="zxx">
@@ -37,7 +38,10 @@
 
       @empty($package)
       @else
-        @include('soft.shared.environment', ['envs' => $package['env']])
+        @empty($package['env'])
+        @else
+          @include('soft.shared.environment', ['envs' => $package['env']])
+        @endempty
 
         @include('soft.shared.ftp')
 
@@ -124,6 +128,15 @@
           }
           updateProgress(30);
       };
+      $software->on_download_package = function ($path, $package, $software) {
+          if (empty($path)) {
+              appendProgressInfo('连接远程应用包.', 'danger', true);
+          } else {
+              appendProgressInfo('连接远程应用包.' . basename($path), 'success', true);
+              appendProgressInfo('解压缩当前应用包.');
+          }
+          updateProgress(30);
+      };
       $software->on_unzip_package = function ($path, $package, $software) {
           if (empty($path)) {
               appendProgressInfo('解压缩当前应用包.', 'danger', true);
@@ -176,5 +189,5 @@
       $software->install();
       var_dump($hasOldTable);
   }
-  
+
 @endphp

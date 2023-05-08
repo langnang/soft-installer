@@ -52,7 +52,7 @@ class SoftwareController extends Controller
             $this->app = $config;
             return;
         }
-        $this->config = $config;
+        $this->setConfig($config);
         $this->software_construct($config, $mini);
         if ($mini) return;
         $this->software_package_construct($config);
@@ -65,6 +65,11 @@ class SoftwareController extends Controller
         // $this->db = app('db');
         // $this->faker = app('Faker\Generator');
         // $this->local = new \League\Flysystem\Filesystem(new \League\Flysystem\Local\LocalFilesystemAdapter($this->root_path));
+    }
+    public function setConfig($config)
+    {
+        $config['files'] = isset($config['files']) ? $config['files'] : [];
+        $this->config = $config;
     }
     public function setToken()
     {
@@ -81,7 +86,7 @@ class SoftwareController extends Controller
             case 'db':
                 return !empty($this->package['database']) || !empty($this->config['database']);
             case 'files':
-                break;
+                return !empty($this->config['files']) || !empty($this->package['files']);
             default:
                 break;
         }
@@ -89,8 +94,8 @@ class SoftwareController extends Controller
     // 创建配置文件
     public function generate_config_files()
     {
-        $files = array_merge($this->config['files'], $this->package['files']);
-
+        $files = array_merge(isset($this->config['files']) ? $this->config['files'] : [], isset($this->package['files']) ? $this->package['files'] : []);
+        var_dump($files);
         foreach ($files as $file) {
             $path = $this->package['local_dir'] . '/' . $file['path'];
             $content = str_replace([
@@ -160,7 +165,7 @@ class SoftwareController extends Controller
 
         $this->generate_config_files();
 
-        // $this->ftp_upload($directory_package, $this->package['directory']);
+        $this->ftp_upload($directory_package, isset($this->package['directory']) ? $this->package['directory'] : '/');
         foreach (array_keys($this->tables) as $table) {
             $hasTable = $this->table_exists($table);
             if ($hasTable) continue;

@@ -18,15 +18,21 @@ trait SoftwarePackageTrait
     {
         $this->packages = isset($config['packages']) ? $config['packages'] : $this->packages;
     }
+    public function setPackage($package)
+    {
+        $package['local_file'] = isset($package['local_file']) ? $package['local_file'] : null;
+        $package['files'] = isset($package['files']) ? $package['files'] : [];
+        $this->package = $package;
+    }
     public function getPackage($version = null)
     {
         if (sizeof($this->packages) === 0) return;
         if (empty($version)) {
-            $this->package = $this->packages[0];
+            $this->setPackage($this->packages[0]);
         } else {
             foreach ($this->packages as $package) {
                 if ($package['version'] == $version) {
-                    $this->package = $package;
+                    $this->setPackage($package);
                     break; // 终止循环
                 }
             }
@@ -57,16 +63,23 @@ trait SoftwarePackageTrait
     // 下载应用包
     public function download_package($slug, $callback = null)
     {
-        foreach ($this->package['urls'] as $url) {
-            $extension = $this->get_zip_extension($url);
-            $path = $this->getSlug() . '/' . $this->getSlug() . '-' . $this->package['version'] . '.' . $extension;
-            $file = fopen($url, 'r');
-            if (empty($file)) {
-                throw new \Exception("Unable to open file!");
+        try {
+            if (!app('files')->exists(env('SOFTWARE_ROOT') . '/' . $slug)) {
+                app('files')->makeDirectory(env('SOFTWARE_ROOT') . '/' . $slug);
             }
-            $this->local->writeStream($path, $file);
-            $this->package['local_file'] = $path;
-            break;
+
+            foreach ($this->package['urls'] as $url) {
+                $extension = $this->get_zip_extension($url);
+                $path = env('SOFTWARE_ROOT') . '/' . $slug . '/' . $slug . '-' . $this->package['version'] . '.' . $extension;
+                $file = fopen($url, 'r');
+                if (empty($file)) {
+                    throw new \Exception("Unable to open file!");
+                }
+                app('files')->put($path, $file);
+                $this->package['local_file'] = $path;
+                break;
+            }
+        } catch (\Exception $e) {
         }
         if ($this->on_download_package) {
             $return = call_user_func($this->on_download_package, $this->package['local_file'], $this->package, $this);
