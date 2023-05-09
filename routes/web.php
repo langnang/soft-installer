@@ -31,7 +31,6 @@ $router->group(['prefix' => 'software'], function () use ($router) {
         // 远程配置文件不存在
         if (!($software instanceof SoftwareController)) return redirect('software');
         $package = $software->getPackage($request->version);
-        var_dump($package);
         $view = 'soft.install';
         // 自定义视图
         if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
