@@ -17,7 +17,7 @@ jobs:
       #   run: composer install
 
       - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           # ftp server
           server: ftpupload.net
@@ -32,6 +32,4 @@ jobs:
             **/.git*
             **/.git*/**
             **/node_modules/**
-            **/node_modules*/**
-            **/.github/**
-            **/.github*/**
+            fileToExclude.txt
