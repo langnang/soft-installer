@@ -1,7 +1,10 @@
 ﻿@php
+  set_time_limit(0); //设置程序执行时间
+  ignore_user_abort(true); //设置断开连接继续执行
+  header('X-Accel-Buffering: no'); //关闭buffer
+  ob_start(); //打开输出缓冲控制
   // 是否启动安装
   $isInstall = $request->method() === 'POST' && (isset($ftp_connect_status) ? $ftp_connect_status === true : true) && (isset($db_connect_status) ? $db_connect_status === true : true);
-
 @endphp
 <!DOCTYPE html>
 <html lang="zxx">
@@ -82,10 +85,6 @@
 </html>
 
 @php
-  set_time_limit(0); //设置程序执行时间
-  ignore_user_abort(true); //设置断开连接继续执行
-  header('X-Accel-Buffering: no'); //关闭buffer
-  ob_start(); //打开输出缓冲控制
   if ($isInstall) {
       echo '<script>
         localStorage.setItem("SoftInstaller", JSON.stringify('.json_encode($request->all()).'))
@@ -189,5 +188,5 @@
       $software->install();
       var_dump($hasOldTable);
   }
-
+  
 @endphp
