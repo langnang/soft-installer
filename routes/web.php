@@ -3,9 +3,7 @@
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 use App\Http\Controllers\SoftwareController;
-use App\Models\Software;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 /*
 |--------------------------------------------------------------------------
@@ -66,6 +64,8 @@ $router->group(['prefix' => 'software'], function () use ($router) {
             // 连接MySQL
             $db_connect_status = $software->db_connect($software->getSlug());
         }
+        $software->setToken();
+        app('files')->put('storage/app/' . $software->getToken() . '.json', json_encode($software));
         $view = 'soft.install';
         if (View::exists('soft.' . $software->getSlug())) $view = 'soft.' . $software->name;
         return view($view, [

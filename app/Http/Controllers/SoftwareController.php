@@ -79,6 +79,10 @@ class SoftwareController extends Controller
             "db_config" => $this->db_config,
         ]));
     }
+    public function getToken()
+    {
+        return $this->token;
+    }
     public function has($key)
     {
         switch ($key) {

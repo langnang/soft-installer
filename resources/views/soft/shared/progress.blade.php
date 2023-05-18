@@ -126,11 +126,6 @@
       echo ob_get_clean(); //获取当前缓冲区内容并清除当前的输出缓冲
       flush(); //刷新缓冲区的内容，输出
   }
-  set_time_limit(0); //设置程序执行时间
-  ignore_user_abort(true); //设置断开连接继续执行
-  header('X-Accel-Buffering: no'); //关闭buffer
-  ob_start(); //打开输出缓冲控制
-  
   //   if ($ftp_connect_error_message === true && $db_connect_error_message === true) {
   
   //       $localFile;
@@ -196,7 +191,6 @@
   //       //   appendProgressInfo('未检测到本地应用包，连接远程应用包.<i class="spinner-grow spinner-grow-sm"></i>');
   //   }
   //   ob_end_flush();
-  
 @endphp
 {{-- $script = '<script>
     appendProgressInfo("%u%", "%u%", );

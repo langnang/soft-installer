@@ -1,8 +1,4 @@
 ﻿@php
-  set_time_limit(0); //设置程序执行时间
-  ignore_user_abort(true); //设置断开连接继续执行
-  header('X-Accel-Buffering: no'); //关闭buffer
-  ob_start(); //打开输出缓冲控制
   // 是否启动安装
   $isInstall = $request->method() === 'POST' && (isset($ftp_connect_status) ? $ftp_connect_status === true : true) && (isset($db_connect_status) ? $db_connect_status === true : true);
 @endphp
@@ -69,6 +65,25 @@
 
 @include('home.shared.footer')
 @include('home.shared.script')
+<script>
+  function install() {
+    appendProgressInfo('<i class=\"fa fa-check\"></i>连接 FTP.', 'success');
+    updateProgress(5);
+    axios.interceptors.request.use(function(config) {
+      // 在发送请求之前做些什么
+      config.headers.token = '{{ $software->getToken() }}';
+      console.log(config);
+      return config;
+    }, function(error) {
+      // 对请求错误做些什么
+      return Promise.reject(error);
+    });
+    console.log(axios);
+    axios.post('/api/software/get_local_package', {}).then(res => {
+      console.log(res);
+    })
+  }
+</script>
 @if ($request->method() === 'GET')
 <script>
   const storage = JSON.parse(localStorage.getItem('SoftInstaller'));
@@ -80,6 +95,7 @@
   }
 </script>
 @endif
+
 </body>
 
 </html>
@@ -90,6 +106,7 @@
         localStorage.setItem("SoftInstaller", JSON.stringify('.json_encode($request->all()).'))
       </script>';
       $hasOldTable = false;
+  
       $software->on_start = function ($software) {
           appendProgressInfo('连接 FTP.');
       };
@@ -185,8 +202,18 @@
           } else {
           }
       };
-      $software->install();
+      if (in_array('set_time_limit', explode(',', ini_get('disable_functions')))) {
+          echo '<script>
+            install()
+          </script>';
+      } else {
+          set_time_limit(0); //设置程序执行时间
+          ignore_user_abort(true); //设置断开连接继续执行
+          header('X-Accel-Buffering: no'); //关闭buffer
+          ob_start(); //打开输出缓冲控制
+          $software->install();
+      }
+      var_dump($software);
       var_dump($hasOldTable);
   }
-  
 @endphp
